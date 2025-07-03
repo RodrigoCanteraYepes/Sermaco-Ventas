@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para Sale Order Chapter -->
+    <record id="view_sale_order_chapter_form" model="ir.ui.view">
+        <field name="name">sale.order.chapter.form</field>
+        <field name="model">sale.order.chapter</field>
+        <field name="arch" type="xml">
+            <form string="Capítulo del Presupuesto">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="chapter_type"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="total_amount" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Líneas del Capítulo">
+                            <field name="chapter_line_ids">
+                                <tree editable="bottom" string="Líneas del Capítulo">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                            <div class="oe_clear">
+                                <button name="action_add_suggested_products" 
+                                        string="Añadir Productos Sugeridos" 
+                                        type="object" 
+                                        class="btn-secondary"/>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de lista para Sale Order Chapter -->
+    <record id="view_sale_order_chapter_tree" model="ir.ui.view">
+        <field name="name">sale.order.chapter.tree</field>
+        <field name="model">sale.order.chapter</field>
+        <field name="arch" type="xml">
+            <tree string="Capítulos del Presupuesto">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="chapter_type"/>
+                <field name="total_amount" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para Sale Order Chapter Line -->
+    <record id="view_sale_order_chapter_line_form" model="ir.ui.view">
+        <field name="name">sale.order.chapter.line.form</field>
+        <field name="model">sale.order.chapter.line</field>
+        <field name="arch" type="xml">
+            <form string="Línea del Capítulo">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="product_uom_qty"/>
+                            <field name="product_uom"/>
+                            <field name="price_unit"/>
+                            <field name="price_subtotal" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <div class="oe_clear">
+                        <button name="action_transfer_to_order_lines" 
+                                string="Transferir a Líneas del Pedido" 
+                                type="object" 
+                                class="btn-primary"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Herencia de la vista de formulario de Sale Order -->
+    <record id="view_order_form_inherit_chapters" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.chapters</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Añadir la nueva pestaña después de las líneas del pedido -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Capítulos del Presupuesto" name="chapters">
+                    <div class="o_sale_order_chapters">
+                        <!-- Botones de acción -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <button name="action_add_chapter" 
+                                        string="Añadir Capítulo" 
+                                        type="object" 
+                                        class="btn-primary me-2"
+                                        icon="fa-plus"/>
+                                <button name="action_create_chapter_template" 
+                                        string="Crear Plantilla de Capítulos" 
+                                        type="object" 
+                                        class="btn-secondary me-2"
+                                        icon="fa-magic"/>
+                                <button name="action_transfer_all_chapters_to_lines" 
+                                        string="Transferir Todo a Líneas del Pedido" 
+                                        type="object" 
+                                        class="btn-warning"
+                                        icon="fa-arrow-right"
+                                        confirm="¿Está seguro de que desea transferir todas las líneas de capítulos a las líneas del pedido?"/>
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de capítulos -->
+                        <field name="chapter_ids" nolabel="1">
+                            <tree string="Capítulos" editable="false">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="chapter_type"/>
+                                <field name="total_amount" widget="monetary" sum="Total"/>
+                                <field name="currency_id" invisible="1"/>
+                                <button name="action_add_suggested_products" 
+                                        string="Añadir Sugeridos" 
+                                        type="object" 
+                                        icon="fa-magic" 
+                                        class="btn-sm btn-secondary"/>
+                            </tree>
+                            <form string="Capítulo">
+                                <sheet>
+                                    <group>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="chapter_type"/>
+                                            <field name="sequence"/>
+                                        </group>
+                                        <group>
+                                            <field name="total_amount" widget="monetary"/>
+                                            <field name="currency_id" invisible="1"/>
+                                        </group>
+                                    </group>
+                                    
+                                    <notebook>
+                                        <page string="Líneas del Capítulo">
+                                            <field name="chapter_line_ids">
+                                                <tree editable="bottom">
+                                                    <field name="sequence" widget="handle"/>
+                                                    <field name="name"/>
+                                                    <button name="action_transfer_to_order_lines" 
+                                                            string="Transferir" 
+                                                            type="object" 
+                                                            icon="fa-arrow-right" 
+                                                            class="btn-sm btn-warning"/>
+                                                </tree>
+                                            </field>
+                                            <div class="oe_clear mt-2">
+                                                <button name="action_add_suggested_products" 
+                                                        string="Añadir Productos Sugeridos" 
+                                                        type="object" 
+                                                        class="btn-secondary"/>
+                                            </div>
+                                        </page>
+                                    </notebook>
+                                </sheet>
+                            </form>
+                        </field>
+                        
+                        <!-- Resumen de totales -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="float-end">
+                                    <strong>Total de Capítulos: 
+                                        <field name="chapters_total" widget="monetary" nolabel="1"/>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción para Sale Order Chapter -->
+    <record id="action_sale_order_chapter" model="ir.actions.act_window">
+        <field name="name">Capítulos del Presupuesto</field>
+        <field name="res_model">sale.order.chapter</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea tu primer capítulo del presupuesto
+            </p>
+            <p>
+                Los capítulos te permiten organizar los productos de tu presupuesto
+                en categorías como Alquiler, Montaje, Portes y Otros Conceptos.
+            </p>
+        </field>
+    </record>
+
+</odoo>
