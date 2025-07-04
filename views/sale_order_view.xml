@@ -25,7 +25,13 @@
                             <field name="chapter_line_ids">
                                 <list editable="bottom" string="Líneas del Capítulo">
                                     <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
                                     <field name="name"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
+                                    <field name="currency_id" invisible="1"/>
                                 </list>
                             </field>
                             <div class="oe_clear">
@@ -123,10 +129,10 @@
                         
                         <!-- Lista de capítulos -->
                         <field name="chapter_ids" nolabel="1">
-                            <list string="Capítulos">
+                            <list string="Capítulos" default_group_by="chapter_type">
                                 <field name="sequence" widget="handle"/>
+                                <field name="chapter_type" invisible="1"/>
                                 <field name="name"/>
-                                <field name="chapter_type"/>
                                 <field name="total_amount" widget="monetary" sum="Total"/>
                                 <field name="currency_id" invisible="1"/>
                                 <button name="action_add_suggested_products" 
@@ -154,7 +160,13 @@
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom">
                                                     <field name="sequence" widget="handle"/>
+                                                    <field name="product_id"/>
                                                     <field name="name"/>
+                                                    <field name="product_uom_qty"/>
+                                                    <field name="product_uom"/>
+                                                    <field name="price_unit" widget="monetary"/>
+                                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
+                                                    <field name="currency_id" invisible="1"/>
                                                     <button name="action_transfer_to_order_lines" 
                                                             string="Transferir" 
                                                             type="object" 

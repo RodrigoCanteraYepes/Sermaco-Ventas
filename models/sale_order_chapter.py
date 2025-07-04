@@ -89,28 +89,68 @@ class SaleOrderChapter(models.Model):
                 {
                     'name': _('ALQUILER PLATAFORMA DE CREMALLERA BIMASTIL 30 MT'),
                     'qty': 1.0,
-                    'price': 0.0
+                    'price': 875.0
+                },
+                {
+                    'name': _('SEGURO'),
+                    'qty': 1.0,
+                    'price': 60.0
                 }
             ],
             'montaje': [
                 {
-                    'name': _('MONTAJE INICIAL BIMASTIL'),
+                    'name': _('MONTAJE INICIAL BIMASTIL, ALTURA 30 MT'),
                     'qty': 1.0,
-                    'price': 0.0
+                    'price': 1050.0
+                },
+                {
+                    'name': _('DESMONTAJE FINAL BIMASTIL, ALTURA 30 MT'),
+                    'qty': 1.0,
+                    'price': 1050.0
                 }
             ],
             'portes': [
                 {
-                    'name': _('TRANSPORTE Y PORTES'),
-                    'qty': 1.0,
-                    'price': 0.0
+                    'name': _('PORTE DE ENTREGA (Se estiman 2 portes. Unidad 250 €)'),
+                    'qty': 2.0,
+                    'price': 250.0
+                },
+                {
+                    'name': _('PORTE DE RETIRADA (Se estiman 2 portes. Unidad 250 €)'),
+                    'qty': 2.0,
+                    'price': 250.0
                 }
             ],
             'otros': [
                 {
-                    'name': _('OTROS CONCEPTOS'),
+                    'name': _('GESTIÓN DE CARGA Y DESCARGA'),
                     'qty': 1.0,
-                    'price': 0.0
+                    'price': 50.0
+                },
+                {
+                    'name': _('GESTIÓN DE RESIDUOS PLATAF. CREMALLERA BIMASTIL'),
+                    'qty': 1.0,
+                    'price': 25.0
+                },
+                {
+                    'name': _('CERTIFICADO DE MONTAJE'),
+                    'qty': 1.0,
+                    'price': 150.0
+                },
+                {
+                    'name': _('INSPECCIÓN RD-2177, PLATF. CREMALLERA'),
+                    'qty': 1.0,
+                    'price': 90.0
+                },
+                {
+                    'name': _('ML. TABLA MADERA PARA BARANCILLA (TABLAS DE 3 METROS)'),
+                    'qty': 1.0,
+                    'price': 2.0
+                },
+                {
+                    'name': _('MANGUERA ELÉCTRICA DE 50 MT.'),
+                    'qty': 1.0,
+                    'price': 250.0
                 }
             ]
         }
