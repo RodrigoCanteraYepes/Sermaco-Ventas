@@ -99,12 +99,7 @@
                         </group>
                     </group>
                     
-                    <div class="oe_clear">
-                        <button name="action_transfer_to_order_lines" 
-                                string="Transferir a Líneas del Pedido" 
-                                type="object" 
-                                class="btn-primary"/>
-                    </div>
+
                 </sheet>
             </form>
         </field>
