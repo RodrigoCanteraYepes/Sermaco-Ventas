@@ -332,6 +332,45 @@ class SaleOrderChapterLine(models.Model):
             self.name = self.product_id.display_name
             self.price_unit = self.product_id.list_price
             self.product_uom = self.product_id.uom_id
+    
+    def action_transfer_to_order_lines(self):
+        """Transfiere la línea del capítulo a las líneas del pedido"""
+        self.ensure_one()
+        sale_order = self.chapter_id.order_id
+        
+        # Crear línea en sale.order.line
+        sale_line_vals = {
+            'order_id': sale_order.id,
+            'product_id': self.product_id.id if self.product_id else False,
+            'name': self.name,
+            'product_uom_qty': self.product_uom_qty,
+            'product_uom': self.product_uom.id if self.product_uom else False,
+            'price_unit': self.price_unit,
+        }
+        
+        self.env['sale.order.line'].create(sale_line_vals)
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Éxito'),
+                'message': _('Línea transferida a las líneas del pedido'),
+                'type': 'success',
+            }
+        }
+    
+    def unlink(self):
+        """Control de permisos para eliminar líneas"""
+        if not self.env.user.has_group('sales_team.group_sale_manager'):
+            raise AccessError(_('Solo los gerentes de ventas pueden eliminar líneas de capítulos.'))
+        return super().unlink()
+    
+    def write(self, vals):
+        """Control de permisos para modificar líneas"""
+        if not self.env.user.has_group('sales_team.group_sale_salesman'):
+            raise AccessError(_('No tienes permisos para modificar líneas de capítulos.'))
+        return super().write(vals)
 
 
 class ChapterTemplateWizard(models.TransientModel):
@@ -392,44 +431,7 @@ class ChapterTemplateWizard(models.TransientModel):
             'target': 'current',
         }
     
-    def action_transfer_to_order_lines(self):
-        """Transfiere la línea del capítulo a las líneas del pedido"""
-        self.ensure_one()
-        sale_order = self.chapter_id.order_id
-        
-        # Crear línea en sale.order.line
-        sale_line_vals = {
-            'order_id': sale_order.id,
-            'product_id': self.product_id.id if self.product_id else False,
-            'name': self.name,
-            'product_uom_qty': self.product_uom_qty,
-            'product_uom': self.product_uom.id if self.product_uom else False,
-            'price_unit': self.price_unit,
-        }
-        
-        self.env['sale.order.line'].create(sale_line_vals)
-        
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Éxito'),
-                'message': _('Línea transferida a las líneas del pedido'),
-                'type': 'success',
-            }
-        }
-    
-    def unlink(self):
-        """Control de permisos para eliminar líneas"""
-        if not self.env.user.has_group('sales_team.group_sale_manager'):
-            raise AccessError(_('Solo los gerentes de ventas pueden eliminar líneas de capítulos.'))
-        return super().unlink()
-    
-    def write(self, vals):
-        """Control de permisos para modificar líneas"""
-        if not self.env.user.has_group('sales_team.group_sale_salesman'):
-            raise AccessError(_('No tienes permisos para modificar líneas de capítulos.'))
-        return super().write(vals)
+
 
 
 class SaleOrderChapterTemplate(models.Model):
