@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Reporte personalizado para presupuestos con capítulos -->
+        <record id="action_report_saleorder_chapters" model="ir.actions.report">
+            <field name="name">Presupuesto con Capítulos</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">sale_order_chapter.report_saleorder_chapters</field>
+            <field name="report_file">sale_order_chapter.report_saleorder_chapters</field>
+            <field name="print_report_name">'Presupuesto - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- Template del reporte -->
+        <template id="report_saleorder_chapters">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <!-- Encabezado del presupuesto -->
+                            <div class="oe_structure"/>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Presupuesto: </strong><span t-field="doc.name"/><br/>
+                                    <strong>Fecha: </strong><span t-field="doc.date_order" t-options='{"widget": "date"}'/><br/>
+                                    <strong>Validez: </strong><span t-field="doc.validity_date" t-options='{"widget": "date"}'/>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Cliente: </strong><span t-field="doc.partner_id.name"/><br/>
+                                    <div t-if="doc.partner_id.street">
+                                        <span t-field="doc.partner_id.street"/><br/>
+                                    </div>
+                                    <div t-if="doc.partner_id.city">
+                                        <span t-field="doc.partner_id.zip"/> <span t-field="doc.partner_id.city"/>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <br/>
+                            
+                            <!-- Capítulos del presupuesto -->
+                            <t t-if="doc.chapter_ids">
+                                <t t-foreach="doc.chapter_ids" t-as="chapter">
+                                    <!-- Salto de página si está configurado -->
+                                    <div t-if="chapter.page_break_before and not chapter_first" style="page-break-before: always;"/>
+                                    
+                                    <div class="chapter-section">
+                                        <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007cba; margin-top: 20px;">
+                                            <span t-field="chapter.name"/>
+                                            <span t-if="chapter.chapter_type" class="badge badge-secondary float-right">
+                                                <span t-field="chapter.chapter_type"/>
+                                            </span>
+                                        </h3>
+                                        
+                                        <!-- Líneas del capítulo (siempre expandidas en PDF) -->
+                                        <table class="table table-sm table-bordered">
+                                            <thead style="background-color: #e9ecef;">
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th>Descripción</th>
+                                                    <th class="text-right">Cantidad</th>
+                                                    <th>Unidad</th>
+                                                    <th class="text-right">Precio Unit.</th>
+                                                    <th class="text-right">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="chapter.chapter_line_ids" t-as="line">
+                                                    <tr>
+                                                        <td>
+                                                            <span t-if="line.product_id" t-field="line.product_id.name"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-field="line.name"/>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <span t-field="line.product_uom_qty"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-if="line.product_uom" t-field="line.product_uom.name"/>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            <span t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                            <tfoot style="background-color: #f8f9fa;">
+                                                <tr>
+                                                    <td colspan="5" class="text-right"><strong>Total del Capítulo:</strong></td>
+                                                    <td class="text-right">
+                                                        <strong>
+                                                            <span t-field="chapter.total_amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </strong>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </t>
+                            </t>
+                            
+                            <!-- Total general -->
+                            <div class="row" style="margin-top: 30px;">
+                                <div class="col-6">
+                                </div>
+                                <div class="col-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Subtotal:</strong></td>
+                                            <td class="text-right">
+                                                <span t-field="doc.amount_untaxed" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Impuestos:</strong></td>
+                                            <td class="text-right">
+                                                <span t-field="doc.amount_tax" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-top: 2px solid #000;">
+                                            <td><strong>Total:</strong></td>
+                                            <td class="text-right">
+                                                <strong>
+                                                    <span t-field="doc.amount_total" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Términos y condiciones -->
+                            <div t-if="doc.note" style="margin-top: 30px;">
+                                <h4>Términos y Condiciones:</h4>
+                                <p t-field="doc.note"/>
+                            </div>
+                            
+                            <div class="oe_structure"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -8,7 +8,7 @@ class SaleOrder(models.Model):
 
     chapter_ids = fields.One2many(
         'sale.order.chapter',
-        'sale_order_id',
+        'order_id',
         string='Capítulos del Presupuesto'
     )
     
@@ -34,7 +34,7 @@ class SaleOrder(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {
-                'default_sale_order_id': self.id,
+                'default_order_id': self.id,
                 'default_sequence': len(self.chapter_ids) * 10 + 10,
             }
         }
@@ -80,7 +80,7 @@ class SaleOrder(models.Model):
             existing_chapter = self.chapter_ids.filtered(lambda c: c.chapter_type == chapter_type)
             if not existing_chapter:
                 chapter = self.env['sale.order.chapter'].create({
-                    'sale_order_id': self.id,
+                    'order_id': self.id,
                     'chapter_type': chapter_type,
                     'sequence': (i + 1) * 10
                 })
@@ -95,4 +95,15 @@ class SaleOrder(models.Model):
                 'message': _('Plantilla de capítulos creada exitosamente'),
                 'type': 'success',
             }
+        }
+    
+    def action_apply_multiple_templates(self):
+        """Abrir wizard para aplicar múltiples plantillas"""
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Aplicar Múltiples Plantillas'),
+            'res_model': 'chapter.template.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_sale_order_id': self.id}
         }
