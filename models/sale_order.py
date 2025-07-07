@@ -36,6 +36,11 @@ class SaleOrder(models.Model):
         currency_field='currency_id'
     )
     
+    new_chapter_name = fields.Char(
+        string='Nombre del Nuevo Capítulo',
+        help='Campo temporal para crear capítulos inline'
+    )
+    
     @api.depends('chapter_ids.total_amount')
     def _compute_chapters_total(self):
         for order in self:
@@ -53,6 +58,32 @@ class SaleOrder(models.Model):
             'context': {
                 'default_order_id': self.id,
                 'default_sequence': len(self.chapter_ids) * 10 + 10,
+            }
+        }
+    
+    def action_create_chapter_inline(self):
+        """Crea un capítulo directamente desde el campo inline"""
+        self.ensure_one()
+        if not self.new_chapter_name:
+            return
+        
+        # Crear el capítulo
+        chapter = self.env['sale.order.chapter'].create({
+            'order_id': self.id,
+            'name': self.new_chapter_name,
+            'sequence': (len(self.chapter_ids) + 1) * 10
+        })
+        
+        # Limpiar el campo temporal
+        self.new_chapter_name = False
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Éxito'),
+                'message': _('Capítulo "%s" creado exitosamente') % chapter.name,
+                'type': 'success',
             }
         }
     

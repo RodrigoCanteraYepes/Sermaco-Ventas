@@ -1,88 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista de formulario para Sale Order Chapter -->
-    <record id="view_sale_order_chapter_form" model="ir.ui.view">
-        <field name="name">sale.order.chapter.form</field>
-        <field name="model">sale.order.chapter</field>
-        <field name="arch" type="xml">
-            <form>
-                <header>
-                    <h1><field name="name" readonly="1" class="oe_title"/></h1>
-                    <button name="action_save_as_template" 
-                            string="Guardar como Plantilla" 
-                            type="object" 
-                            class="btn-primary"
-                            groups="sales_team.group_sale_salesman"/>
-                    <button name="action_load_from_template" 
-                            string="Cargar desde Plantilla" 
-                            type="object" 
-                            class="btn-secondary"
-                            groups="sales_team.group_sale_salesman"/>
-                </header>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="sequence"/>
-                        </group>
-                        <group>
-                            <field name="order_id" readonly="1"/>
-                            <field name="total_amount" widget="monetary"/>
-                            <field name="currency_id" invisible="1"/>
-                        </group>
-                    </group>
-                    
-                    <notebook>
-                        <page string="Líneas del Capítulo">
-                            <field name="chapter_line_ids">
-                                <list editable="bottom" string="Líneas del Capítulo" default_group_by="line_type">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="line_type"/>
-                                    <field name="product_id"/>
-                                    <field name="name"/>
-                                    <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
-                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
-                                     <field name="rental_periods" invisible="line_type != 'alquiler'"/>
-                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
-                                    <field name="tax_ids" widget="many2many_tags"/>
-                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <button name="action_transfer_to_order_lines" 
-                                            string="Transferir" 
-                                            type="object" 
-                                            icon="fa-arrow-right" 
-                                            class="btn-sm btn-warning"
-                                            help="Transfiere esta línea a las líneas del pedido de venta"/>
-                                </list>
-                            </field>
-                            <div class="oe_clear">
-                                <button name="action_add_suggested_products" 
-                                        string="Añadir Productos Sugeridos" 
-                                        type="object" 
-                                        class="btn-secondary"/>
-                            </div>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <!-- Vista de lista para Sale Order Chapter -->
-    <record id="view_sale_order_chapter_list" model="ir.ui.view">
-        <field name="name">sale.order.chapter.list</field>
-        <field name="model">sale.order.chapter</field>
-        <field name="arch" type="xml">
-            <list string="Capítulos del Presupuesto">
-                <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="total_amount" widget="monetary"/>
-                <field name="currency_id" invisible="1"/>
-            </list>
-        </field>
-    </record>
+    <!-- Las vistas de diálogo han sido eliminadas - funcionalidad integrada en el tab principal -->
 
     <!-- Vista de formulario para Sale Order Chapter Line -->
     <record id="view_sale_order_chapter_line_form" model="ir.ui.view">
@@ -132,31 +50,38 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Capítulos del Presupuesto" name="chapters">
                     <div class="o_sale_order_chapters">
-                        <!-- Botones de acción -->
+                        <!-- Crear Nuevo Capítulo -->
                         <div class="row mb-3">
-                            <div class="col-12">
-                                <button name="action_add_chapter" 
-                                        string="Añadir Capítulo" 
-                                        type="object" 
-                                        class="btn-primary me-2"
-                                        icon="fa-plus"/>
-                                <button name="action_create_chapter_template" 
-                                        string="Crear Capítulo con Productos Sugeridos" 
-                                        type="object" 
-                                        class="btn-secondary me-2"
-                                        icon="fa-magic"/>
-                                <button name="action_apply_multiple_templates" 
-                                        string="Aplicar Plantillas" 
-                                        type="object" 
-                                        class="btn-info me-2"
-                                        icon="fa-magic"
-                                        groups="sales_team.group_sale_salesman"/>
-                                <button name="action_transfer_all_chapters_to_lines" 
-                                        string="Transferir Todo a Líneas del Pedido" 
-                                        type="object" 
-                                        class="btn-warning"
-                                        icon="fa-arrow-right"
-                                        confirm="¿Está seguro de que desea transferir todas las líneas de capítulos a las líneas del pedido?"/>
+                            <div class="col-6">
+                                <group string="Crear Nuevo Capítulo">
+                                    <field name="new_chapter_name" placeholder="Nombre del Capítulo" nolabel="1"/>
+                                    <button name="action_create_chapter_inline" 
+                                            string="Crear Capítulo" 
+                                            type="object" 
+                                            class="btn-primary"
+                                            attrs="{'invisible': [('new_chapter_name', '=', False)]}"/>
+                                </group>
+                            </div>
+                            <div class="col-6">
+                                <group string="Acciones">
+                                    <button name="action_create_chapter_template" 
+                                            string="Crear Capítulo con Productos Sugeridos" 
+                                            type="object" 
+                                            class="btn-secondary me-2"
+                                            icon="fa-magic"/>
+                                    <button name="action_apply_multiple_templates" 
+                                            string="Aplicar Plantillas" 
+                                            type="object" 
+                                            class="btn-info me-2"
+                                            icon="fa-magic"
+                                            groups="sales_team.group_sale_salesman"/>
+                                    <button name="action_transfer_all_chapters_to_lines" 
+                                            string="Transferir Todo a Líneas del Pedido" 
+                                            type="object" 
+                                            class="btn-warning"
+                                            icon="fa-arrow-right"
+                                            confirm="¿Está seguro de que desea transferir todas las líneas de capítulos a las líneas del pedido?"/>
+                                </group>
                             </div>
                         </div>
                         
@@ -256,21 +181,7 @@
         </field>
     </record>
 
-    <!-- Acción para Sale Order Chapter -->
-    <record id="action_sale_order_chapter" model="ir.actions.act_window">
-        <field name="name">Capítulos del Presupuesto</field>
-        <field name="res_model">sale.order.chapter</field>
-        <field name="view_mode">list,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Crea tu primer capítulo del presupuesto
-            </p>
-            <p>
-                Los capítulos te permiten organizar los productos de tu presupuesto
-                en categorías como Alquiler, Montaje, Portes y Otros Conceptos.
-            </p>
-        </field>
-    </record>
+    <!-- Acción eliminada - funcionalidad integrada en el tab principal -->
     
     <!-- Vistas para Plantillas de Capítulos -->
     <record id="view_chapter_template_list" model="ir.ui.view">
