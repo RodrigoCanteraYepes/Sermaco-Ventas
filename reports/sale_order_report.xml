@@ -49,9 +49,6 @@
                                     <div class="chapter-section">
                                         <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007cba; margin-top: 20px;">
                                             <span t-field="chapter.name"/>
-                                            <span t-if="chapter.chapter_type" class="badge badge-secondary float-right">
-                                                <span t-field="chapter.chapter_type"/>
-                                            </span>
                                         </h3>
                                         
                                         <!-- Líneas del capítulo (siempre expandidas en PDF) -->

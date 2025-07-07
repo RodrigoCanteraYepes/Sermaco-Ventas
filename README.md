@@ -65,7 +65,6 @@ sale_order_chapters/
 
 **Campos principales:**
 - `name`: Nombre del capítulo (Char)
-- `chapter_type`: Tipo de capítulo (Selection: Alquiler, Montaje, Portes, Otros)
 - `sale_order_id`: Relación con el presupuesto de venta (Many2one)
 - `sequence`: Orden de visualización (Integer)
 - `chapter_line_ids`: Líneas del capítulo (One2many)
@@ -73,8 +72,8 @@ sale_order_chapters/
 - `currency_id`: Moneda (Many2one)
 
 **Métodos principales:**
-- `action_add_suggested_products()`: Añade productos sugeridos según el tipo
-- `_get_suggested_products()`: Retorna productos sugeridos por tipo
+- `action_add_suggested_products()`: Añade productos sugeridos generales
+- `_get_suggested_products()`: Retorna lista de productos sugeridos
 
 ### 2. `sale.order.chapter.line`
 **Descripción:** Líneas individuales dentro de cada capítulo.
@@ -82,6 +81,7 @@ sale_order_chapters/
 **Campos principales:**
 - `chapter_id`: Relación con el capítulo (Many2one)
 - `sequence`: Orden de la línea (Integer)
+- `line_type`: Tipo de línea (Selection: Alquiler, Montaje, Portes, Otros)
 - `product_id`: Producto (Many2one)
 - `name`: Descripción (Text)
 - `product_uom_qty`: Cantidad (Float)
@@ -89,6 +89,7 @@ sale_order_chapters/
 - `price_unit`: Precio unitario (Float)
 - `price_subtotal`: Subtotal calculado (Monetary)
 - `currency_id`: Moneda (Many2one)
+- Campos específicos para alquiler: `rental_period_type`, `rental_periods`, `price_per_period`
 
 **Métodos principales:**
 - `action_transfer_to_order_lines()`: Transfiere la línea a las líneas del pedido
@@ -103,7 +104,7 @@ sale_order_chapters/
 **Métodos añadidos:**
 - `action_add_chapter()`: Abre formulario para añadir nuevo capítulo
 - `action_transfer_all_chapters_to_lines()`: Transfiere todas las líneas de capítulos
-- `action_create_chapter_template()`: Crea plantilla con todos los tipos de capítulos
+- `action_create_chapter_template()`: Crea un capítulo con productos sugeridos
 
 ## Vistas Implementadas
 
@@ -188,18 +189,18 @@ sale_order_chapters/
 
 ## Personalización
 
-### Añadir Nuevos Tipos de Capítulos
+### Añadir Nuevos Tipos de Línea
 
-En `models/sale_order_chapter.py`, modificar la selección `chapter_type`:
+En `models/sale_order_chapter.py`, modificar la selección `line_type` en el modelo `SaleOrderChapterLine`:
 
 ```python
-chapter_type = fields.Selection([
+line_type = fields.Selection([
     ('alquiler', 'Alquiler'),
     ('montaje', 'Montaje'),
     ('portes', 'Portes'),
     ('otros', 'Otros Conceptos'),
     ('nuevo_tipo', 'Nuevo Tipo'),  # Añadir aquí
-], string='Tipo de Capítulo', required=True, default='alquiler')
+], string='Tipo de Línea', required=True, default='alquiler')
 ```
 
 ### Modificar Productos Sugeridos
@@ -207,16 +208,15 @@ chapter_type = fields.Selection([
 En el método `_get_suggested_products()`, añadir o modificar las sugerencias:
 
 ```python
-suggestions = {
-    'alquiler': [
-        {
-            'name': _('NUEVO PRODUCTO DE ALQUILER'),
-            'qty': 1.0,
-            'price': 100.0
-        }
-    ],
-    # ... resto de tipos
-}
+suggested_products = [
+    {
+        'name': _('NUEVO PRODUCTO SUGERIDO'),
+        'qty': 1.0,
+        'price': 100.0,
+        'line_type': 'alquiler'
+    },
+    # ... más productos
+]
 ```
 
 ## Seguridad
@@ -229,10 +229,10 @@ El módulo incluye permisos para:
 
 ### Métodos Principales
 - `action_add_chapter()`: Abre formulario para nuevo capítulo
-- `action_create_chapter_template()`: Crea los 4 tipos de capítulos predefinidos
+- `action_create_chapter_template()`: Crea un capítulo con productos sugeridos
 - `action_transfer_all_chapters_to_lines()`: Transfiere todas las líneas al pedido
 - `action_add_suggested_products()`: Añade productos sugeridos por tipo
-- `_get_suggested_products()`: Lógica de productos sugeridos (personalizable)
+- `_get_suggested_products()`: Lógica de productos sugeridos generales (personalizable)
 
 ### Validaciones y Cálculos
 - Cálculo automático de subtotales por línea

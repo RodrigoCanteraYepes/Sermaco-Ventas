@@ -70,29 +70,24 @@ class SaleOrder(models.Model):
         }
     
     def action_create_chapter_template(self):
-        """Crea capítulos con plantillas predefinidas"""
+        """Crea un capítulo con productos sugeridos"""
         self.ensure_one()
         
-        chapter_types = ['alquiler', 'montaje', 'portes', 'otros']
-        
-        for i, chapter_type in enumerate(chapter_types):
-            # Verificar si ya existe un capítulo de este tipo
-            existing_chapter = self.chapter_ids.filtered(lambda c: c.chapter_type == chapter_type)
-            if not existing_chapter:
-                chapter = self.env['sale.order.chapter'].create({
-                    'order_id': self.id,
-                    'chapter_type': chapter_type,
-                    'sequence': (i + 1) * 10
-                })
-                # Añadir productos sugeridos
-                chapter.action_add_suggested_products()
+        # Crear un capítulo general
+        chapter = self.env['sale.order.chapter'].create({
+            'order_id': self.id,
+            'name': _('Capítulo General'),
+            'sequence': (len(self.chapter_ids) + 1) * 10
+        })
+        # Añadir productos sugeridos
+        chapter.action_add_suggested_products()
         
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Éxito'),
-                'message': _('Plantilla de capítulos creada exitosamente'),
+                'message': _('Capítulo con productos sugeridos creado exitosamente'),
                 'type': 'success',
             }
         }

@@ -23,7 +23,6 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="chapter_type"/>
                             <field name="sequence"/>
                         </group>
                         <group>
@@ -43,9 +42,19 @@
                                     <field name="name"/>
                                     <field name="product_uom_qty"/>
                                     <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
+                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                                    <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                                    <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                     <field name="currency_id" invisible="1"/>
+                                    <button name="action_transfer_to_order_lines" 
+                                            string="Transferir" 
+                                            type="object" 
+                                            icon="fa-arrow-right" 
+                                            class="btn-sm btn-warning"
+                                            help="Transfiere esta línea a las líneas del pedido de venta"/>
                                 </list>
                             </field>
                             <div class="oe_clear">
@@ -69,7 +78,6 @@
             <list string="Capítulos del Presupuesto">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="chapter_type"/>
                 <field name="total_amount" widget="monetary"/>
                 <field name="currency_id" invisible="1"/>
             </list>
@@ -82,6 +90,13 @@
         <field name="model">sale.order.chapter.line</field>
         <field name="arch" type="xml">
             <form string="Línea del Capítulo">
+                <header>
+                    <button name="action_transfer_to_order_lines" 
+                            string="Transferir a Líneas del Pedido" 
+                            type="object" 
+                            class="btn-primary"
+                            help="Transfiere esta línea a las líneas del pedido de venta"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -97,12 +112,11 @@
                             <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
                             <field name="rental_periods" invisible="line_type != 'alquiler'"/>
                             <field name="price_per_period" invisible="line_type != 'alquiler'"/>
+                            <field name="tax_ids" widget="many2many_tags"/>
                             <field name="price_subtotal" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
-                    
-
                 </sheet>
             </form>
         </field>
@@ -154,9 +168,8 @@
                         
                         <!-- Lista de capítulos -->
                         <field name="chapter_ids" nolabel="1">
-                            <list string="Capítulos" default_group_by="chapter_type">
+                            <list string="Capítulos" editable="bottom">
                                 <field name="sequence" widget="handle"/>
-                                <field name="chapter_type" invisible="1"/>
                                 <field name="name"/>
                                 <field name="is_collapsed" invisible="1"/>
                                 <field name="total_amount" widget="monetary" sum="Total"/>
@@ -166,25 +179,27 @@
                                         type="object" 
                                         icon="fa-minus" 
                                         class="btn-sm btn-secondary"
-                                        invisible="is_collapsed == True"/>
+                                        invisible="is_collapsed == True"
+                                        help="Oculta las líneas del capítulo para una vista más compacta"/>
                                 <button name="action_toggle_collapse" 
                                         string="Expandir" 
                                         type="object" 
                                         icon="fa-plus" 
                                         class="btn-sm btn-secondary"
-                                        invisible="is_collapsed == False"/>
+                                        invisible="is_collapsed == False"
+                                        help="Muestra las líneas del capítulo"/>
                                 <button name="action_add_suggested_products" 
                                         string="Añadir Sugeridos" 
                                         type="object" 
                                         icon="fa-magic" 
-                                        class="btn-sm btn-secondary"/>
+                                        class="btn-sm btn-secondary"
+                                        help="Añade productos recomendados basados en el tipo de capítulo"/>
                             </list>
                             <form string="Capítulo">
                                 <sheet>
                                     <group>
                                         <group>
                                             <field name="name"/>
-                                            <field name="chapter_type"/>
                                             <field name="sequence"/>
                                             <field name="is_collapsed"/>
                                         </group>
@@ -209,6 +224,7 @@
                                                     <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
                                                     <field name="rental_periods" invisible="line_type != 'alquiler'"/>
                                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
+                                                    <field name="tax_ids" widget="many2many_tags"/>
                                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                                     <field name="currency_id" invisible="1"/>
                                                     <button name="action_transfer_to_order_lines" 
@@ -269,7 +285,6 @@
         <field name="arch" type="xml">
             <list string="Plantillas de Capítulos">
                 <field name="name"/>
-                <field name="chapter_type"/>
                 <field name="user_id"/>
                 <field name="active"/>
                 <button name="action_apply_template" 
@@ -297,7 +312,6 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="chapter_type"/>
                             <field name="active"/>
                         </group>
                         <group>
@@ -316,6 +330,7 @@
                                     <field name="product_uom_qty"/>
                                     <field name="product_uom"/>
                                     <field name="price_unit" widget="monetary"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
                                 </list>
                             </field>
                         </page>

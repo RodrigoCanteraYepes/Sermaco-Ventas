@@ -13,12 +13,7 @@ class SaleOrderChapter(models.Model):
         string='Nombre del Capítulo',
         required=True
     )
-    chapter_type = fields.Selection([
-        ('alquiler', 'Alquiler'),
-        ('montaje', 'Montaje'),
-        ('portes', 'Portes'),
-        ('otros', 'Otros Conceptos')
-    ], string='Tipo de Capítulo', required=True, default='alquiler')
+    # Campo chapter_type eliminado - ahora se usa line_type en cada línea
     
     order_id = fields.Many2one(
         'sale.order',
@@ -70,14 +65,8 @@ class SaleOrderChapter(models.Model):
     
     @api.model
     def create(self, vals):
-        if 'name' not in vals and 'chapter_type' in vals:
-            chapter_names = {
-                'alquiler': _('Alquiler'),
-                'montaje': _('Montaje'),
-                'portes': _('Portes'),
-                'otros': _('Otros Conceptos')
-            }
-            vals['name'] = chapter_names.get(vals['chapter_type'], _('Nuevo Capítulo'))
+        if 'name' not in vals:
+            vals['name'] = _('Nuevo Capítulo')
         return super().create(vals)
     
     def action_add_suggested_products(self):
@@ -92,104 +81,74 @@ class SaleOrderChapter(models.Model):
                 'name': product_data.get('name', ''),
                 'product_uom_qty': product_data.get('qty', 1.0),
                 'price_unit': product_data.get('price', 0.0),
-                'line_type': product_data.get('line_type', self.chapter_type),
+                'line_type': product_data.get('line_type', 'alquiler'),
             })
     
     def _get_suggested_products(self):
-        """Retorna productos sugeridos según el tipo de capítulo"""
-        suggestions = {
-            'alquiler': [
-                {
-                    'name': _('ALQUILER PLATAFORMA DE CREMALLERA BIMASTIL 30 MT'),
-                    'qty': 1.0,
-                    'price': 875.0,
-                    'line_type': 'alquiler'
-                },
-                {
-                    'name': _('SEGURO'),
-                    'qty': 1.0,
-                    'price': 60.0,
-                    'line_type': 'alquiler'
-                }
-            ],
-            'montaje': [
-                {
-                    'name': _('MONTAJE INICIAL BIMASTIL, ALTURA 30 MT'),
-                    'qty': 1.0,
-                    'price': 1050.0,
-                    'line_type': 'montaje'
-                },
-                {
-                    'name': _('DESMONTAJE FINAL BIMASTIL, ALTURA 30 MT'),
-                    'qty': 1.0,
-                    'price': 1050.0,
-                    'line_type': 'montaje'
-                }
-            ],
-            'portes': [
-                {
-                    'name': _('PORTE DE ENTREGA (Se estiman 2 portes. Unidad 250 €)'),
-                    'qty': 2.0,
-                    'price': 250.0,
-                    'line_type': 'portes'
-                },
-                {
-                    'name': _('PORTE DE RETIRADA (Se estiman 2 portes. Unidad 250 €)'),
-                    'qty': 2.0,
-                    'price': 250.0,
-                    'line_type': 'portes'
-                }
-            ],
-            'otros': [
-                {
-                    'name': _('GESTIÓN DE CARGA Y DESCARGA'),
-                    'qty': 1.0,
-                    'price': 50.0,
-                    'line_type': 'otros'
-                },
-                {
-                    'name': _('GESTIÓN DE RESIDUOS PLATAF. CREMALLERA BIMASTIL'),
-                    'qty': 1.0,
-                    'price': 25.0,
-                    'line_type': 'otros'
-                },
-                {
-                    'name': _('CERTIFICADO DE MONTAJE'),
-                    'qty': 1.0,
-                    'price': 150.0,
-                    'line_type': 'otros'
-                },
-                {
-                    'name': _('INSPECCIÓN RD-2177, PLATF. CREMALLERA'),
-                    'qty': 1.0,
-                    'price': 90.0,
-                    'line_type': 'otros'
-                },
-                {
-                    'name': _('ML. TABLA MADERA PARA BARANCILLA (TABLAS DE 3 METROS)'),
-                    'qty': 1.0,
-                    'price': 2.0,
-                    'line_type': 'otros'
-                },
-                {
-                    'name': _('MANGUERA ELÉCTRICA DE 50 MT.'),
-                    'qty': 1.0,
-                    'price': 250.0,
-                    'line_type': 'otros'
-                }
-            ]
-        }
-        return suggestions.get(self.chapter_type, [])
+        """Retorna productos sugeridos generales"""
+        suggestions = [
+            {
+                'name': _('ALQUILER PLATAFORMA DE CREMALLERA BIMASTIL 30 MT'),
+                'qty': 1.0,
+                'price': 875.0,
+                'line_type': 'alquiler'
+            },
+            {
+                'name': _('SEGURO'),
+                'qty': 1.0,
+                'price': 60.0,
+                'line_type': 'alquiler'
+            },
+            {
+                'name': _('MONTAJE INICIAL BIMASTIL, ALTURA 30 MT'),
+                'qty': 1.0,
+                'price': 1050.0,
+                'line_type': 'montaje'
+            },
+            {
+                'name': _('DESMONTAJE FINAL BIMASTIL, ALTURA 30 MT'),
+                'qty': 1.0,
+                'price': 1050.0,
+                'line_type': 'montaje'
+            },
+            {
+                'name': _('PORTE DE ENTREGA (Se estiman 2 portes. Unidad 250 €)'),
+                'qty': 2.0,
+                'price': 250.0,
+                'line_type': 'portes'
+            },
+            {
+                'name': _('PORTE DE RETIRADA (Se estiman 2 portes. Unidad 250 €)'),
+                'qty': 2.0,
+                'price': 250.0,
+                'line_type': 'portes'
+            },
+            {
+                'name': _('GESTIÓN DE CARGA Y DESCARGA'),
+                'qty': 1.0,
+                'price': 50.0,
+                'line_type': 'otros'
+            },
+            {
+                'name': _('CERTIFICADO DE MONTAJE'),
+                'qty': 1.0,
+                'price': 150.0,
+                'line_type': 'otros'
+            }
+        ]
+        return suggestions
     
     def action_save_as_template(self):
         """Guarda el capítulo actual como plantilla"""
         self.ensure_one()
         
+        if not self.chapter_line_ids:
+            raise ValidationError(_('No se puede crear una plantilla de un capítulo vacío.'))
+        
         # Crear la plantilla
         template_vals = {
             'name': f"{self.name} - Plantilla",
             'description': f"Plantilla creada desde el capítulo: {self.name}",
-            'chapter_type': self.chapter_type,
         }
         
         template = self.env['sale.order.chapter.template'].create(template_vals)
@@ -204,17 +163,23 @@ class SaleOrderChapter(models.Model):
                 'name': line.name,
                 'product_uom_qty': line.product_uom_qty,
                 'product_uom': line.product_uom.id if line.product_uom else False,
-                'price_unit': line.price_unit,
+                'price_unit': line.price_unit,                'tax_ids': [(6, 0, line.tax_ids.ids)],
             }
             self.env['sale.order.chapter.template.line'].create(template_line_vals)
         
+        # Forzar commit de la transacción
+        self.env.cr.commit()
+        
+        # Mostrar mensaje de éxito
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Plantilla creada'),
-            'res_model': 'sale.order.chapter.template',
-            'res_id': template.id,
-            'view_mode': 'form',
-            'target': 'new',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Plantilla Creada'),
+                'message': _('La plantilla "%s" se ha guardado correctamente y está disponible en el menú Plantillas de Capítulos.') % template.name,
+                'type': 'success',
+                'sticky': False,
+            }
         }
     
     def action_load_from_template(self):
@@ -227,9 +192,7 @@ class SaleOrderChapter(models.Model):
             'res_model': 'sale.order.chapter.template',
             'view_mode': 'list,form',
             'target': 'new',
-            'domain': [('chapter_type', '=', self.chapter_type)],
             'context': {
-                'default_chapter_type': self.chapter_type,
                 'chapter_id': self.id,
             }
         }
@@ -311,6 +274,12 @@ class SaleOrderChapterLine(models.Model):
         default=0.0
     )
     
+    tax_ids = fields.Many2many(
+        'account.tax',
+        string='Impuestos',
+        domain=[('type_tax_use', '=', 'sale')]
+    )
+    
     # Campos específicos para alquiler
     rental_period_type = fields.Selection([
         ('day', 'Día'),
@@ -359,6 +328,7 @@ class SaleOrderChapterLine(models.Model):
         if self.product_id:
             self.name = self.product_id.display_name
             self.product_uom = self.product_id.uom_id
+            self.tax_ids = self.product_id.taxes_id
             
             if self.line_type == 'alquiler':
                 # Para alquiler, configurar precio por período
@@ -411,6 +381,7 @@ class SaleOrderChapterLine(models.Model):
             'product_uom_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id if self.product_uom else False,
             'price_unit': price_unit,
+            'tax_id': [(6, 0, self.tax_ids.ids)],
         }
         
         self.env['sale.order.line'].create(sale_line_vals)
@@ -464,7 +435,6 @@ class ChapterTemplateWizard(models.TransientModel):
             # Crear el capítulo basado en la plantilla
             chapter_vals = {
                 'name': template.name,
-                'chapter_type': template.chapter_type,
                 'order_id': self.sale_order_id.id,
                 'is_collapsed': False,  # Empezar expandido
                 'page_break_before': True,  # Salto de página por defecto
@@ -484,6 +454,7 @@ class ChapterTemplateWizard(models.TransientModel):
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
                 self.env['sale.order.chapter.line'].create(line_vals)
         
@@ -513,12 +484,7 @@ class SaleOrderChapterTemplate(models.Model):
         string='Descripción'
     )
     
-    chapter_type = fields.Selection([
-        ('alquiler', 'Alquiler'),
-        ('montaje', 'Montaje'),
-        ('portes', 'Portes'),
-        ('otros', 'Otros Conceptos')
-    ], string='Tipo de Capítulo', required=True)
+    # Campo chapter_type eliminado - ahora se usa line_type en cada línea
     
     template_line_ids = fields.One2many(
         'sale.order.chapter.template.line',
@@ -564,6 +530,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
                 self.env['sale.order.chapter.line'].create(line_vals)
             
@@ -579,7 +546,6 @@ class SaleOrderChapterTemplate(models.Model):
             # Crear el capítulo basado en la plantilla
             chapter_vals = {
                 'name': self.name,
-                'chapter_type': self.chapter_type,
                 'order_id': sale_order_id,
             }
             
@@ -596,6 +562,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
                 self.env['sale.order.chapter.line'].create(line_vals)
             
@@ -668,9 +635,16 @@ class SaleOrderChapterTemplateLine(models.Model):
         default=0.0
     )
     
+    tax_ids = fields.Many2many(
+        'account.tax',
+        string='Impuestos',
+        domain=[('type_tax_use', '=', 'sale')]
+    )
+    
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
             self.name = self.product_id.display_name
             self.price_unit = self.product_id.list_price
             self.product_uom = self.product_id.uom_id
+            self.tax_ids = self.product_id.taxes_id
