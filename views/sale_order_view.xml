@@ -42,10 +42,10 @@
                                     <field name="name"/>
                                     <field name="product_uom_qty"/>
                                     <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
-                                    <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                     <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                     <field name="price_per_period" widget="monetary" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
+                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                                     <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
                                     <field name="tax_ids" widget="many2many_tags"/>
                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                     <field name="currency_id" invisible="1"/>
@@ -108,10 +108,10 @@
                         <group>
                             <field name="product_uom_qty"/>
                             <field name="product_uom"/>
-                            <field name="price_unit" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
-                            <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                             <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                             <field name="price_per_period" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                            <field name="price_unit" invisible="line_type == 'alquiler'"/>
+                            <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                             <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                             <field name="price_per_period" invisible="line_type != 'alquiler'"/>
                             <field name="tax_ids" widget="many2many_tags"/>
                             <field name="price_subtotal" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
@@ -173,14 +173,14 @@
                                         type="object" 
                                         icon="fa-minus" 
                                         class="btn-sm btn-secondary"
-                                        attrs="{'invisible': [('is_collapsed', '=', True)]}"
+                                        invisible="is_collapsed == True"
                                         help="Oculta las líneas del capítulo para una vista más compacta"/>
                                 <button name="action_toggle_collapse" 
                                         string="Expandir" 
                                         type="object" 
                                         icon="fa-plus" 
                                         class="btn-sm btn-secondary"
-                                        attrs="{'invisible': [('is_collapsed', '=', False)]}"
+                                        invisible="is_collapsed == False"
                                         help="Muestra las líneas del capítulo"/>
                                 <button name="action_add_suggested_products" 
                                         string="Añadir Sugeridos" 
@@ -205,7 +205,7 @@
                                     </group>
                                     
                                     <notebook>
-                                        <page string="Líneas del Capítulo" attrs="{'invisible': [('is_collapsed', '=', True)]}">
+                                        <page string="Líneas del Capítulo" invisible="is_collapsed == True">
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
@@ -214,10 +214,10 @@
                                                     <field name="name"/>
                                                     <field name="product_uom_qty"/>
                                                     <field name="product_uom"/>
-                                                    <field name="price_unit" widget="monetary" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
-                                                    <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                                     <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                                     <field name="price_per_period" widget="monetary" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
+                                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                                                     <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
                                                     <field name="tax_ids" widget="many2many_tags"/>
                                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                                     <field name="currency_id" invisible="1"/>
@@ -405,7 +405,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_id']" position="after">
                 <field name="line_type"/>
-                <field name="source_chapter_id" readonly="1" attrs="{'invisible': [('source_chapter_id', '=', False)]}"/>
+                <field name="source_chapter_id" readonly="1" invisible="source_chapter_id == False"/>
             </xpath>
         </field>
     </record>
