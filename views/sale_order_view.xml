@@ -59,7 +59,7 @@
                                             string="Crear Capítulo" 
                                             type="object" 
                                             class="btn-primary"
-                                            attrs="{'invisible': [('new_chapter_name', '=', False)]}"/>
+                                            invisible="new_chapter_name == False"/>
                                 </group>
                             </div>
                             <div class="col-6">
