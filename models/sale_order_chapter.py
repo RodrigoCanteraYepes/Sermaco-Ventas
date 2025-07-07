@@ -250,7 +250,10 @@ class SaleOrderChapter(models.Model):
         """Alterna el estado de minimizado del capítulo"""
         self.ensure_one()
         self.is_collapsed = not self.is_collapsed
-        return {'type': 'ir.actions.do_nothing'}
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
     
 
 
