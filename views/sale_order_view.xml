@@ -397,17 +397,6 @@
         </field>
     </record>
 
-    <!-- Herencia del formulario de líneas del pedido -->
-    <record id="view_order_line_form_inherit_line_type" model="ir.ui.view">
-        <field name="name">sale.order.line.form.inherit.line.type</field>
-        <field name="model">sale.order.line</field>
-        <field name="inherit_id" ref="sale.view_order_line_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='product_id']" position="after">
-                <field name="line_type"/>
-                <field name="source_chapter_id" readonly="1" invisible="not source_chapter_id"/>
-            </xpath>
-        </field>
-    </record>
+
 
 </odoo>
