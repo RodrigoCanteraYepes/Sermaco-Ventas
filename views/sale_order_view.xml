@@ -93,7 +93,10 @@
                         <group>
                             <field name="product_uom_qty"/>
                             <field name="product_uom"/>
-                            <field name="price_unit"/>
+                            <field name="price_unit" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
+                            <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                            <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                            <field name="price_per_period" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
                             <field name="price_subtotal" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
@@ -202,7 +205,10 @@
                                                     <field name="name"/>
                                                     <field name="product_uom_qty"/>
                                                     <field name="product_uom"/>
-                                                    <field name="price_unit" widget="monetary"/>
+                                                    <field name="price_unit" widget="monetary" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
+                                                    <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                                                    <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                                                    <field name="price_per_period" widget="monetary" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
                                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                                     <field name="currency_id" invisible="1"/>
                                                     <button name="action_transfer_to_order_lines" 

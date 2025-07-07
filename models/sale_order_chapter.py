@@ -311,6 +311,26 @@ class SaleOrderChapterLine(models.Model):
         default=0.0
     )
     
+    # Campos específicos para alquiler
+    rental_period_type = fields.Selection([
+        ('day', 'Día'),
+        ('week', 'Semana'),
+        ('month', 'Mes')
+    ], string='Tipo de Período', default='day')
+    
+    rental_periods = fields.Float(
+        string='Períodos de Alquiler',
+        default=1.0,
+        help='Número de días, semanas o meses según el tipo de período'
+    )
+    
+    price_per_period = fields.Float(
+        string='Precio por Período',
+        digits='Product Price',
+        default=0.0,
+        help='Precio por día, semana o mes según el tipo de período'
+    )
+    
     price_subtotal = fields.Monetary(
         string='Subtotal',
         compute='_compute_amount',
@@ -324,31 +344,73 @@ class SaleOrderChapterLine(models.Model):
         readonly=True
     )
     
-    @api.depends('product_uom_qty', 'price_unit')
+    @api.depends('product_uom_qty', 'price_unit', 'rental_periods', 'price_per_period', 'line_type')
     def _compute_amount(self):
         for line in self:
-            line.price_subtotal = line.product_uom_qty * line.price_unit
+            if line.line_type == 'alquiler' and line.price_per_period > 0:
+                # Para alquiler, usar precio por período * períodos * cantidad
+                line.price_subtotal = line.product_uom_qty * line.rental_periods * line.price_per_period
+            else:
+                # Para otros tipos, usar cálculo tradicional
+                line.price_subtotal = line.product_uom_qty * line.price_unit
     
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
             self.name = self.product_id.display_name
-            self.price_unit = self.product_id.list_price
             self.product_uom = self.product_id.uom_id
+            
+            if self.line_type == 'alquiler':
+                # Para alquiler, configurar precio por período
+                self.price_per_period = self.product_id.list_price
+                self.price_unit = 0.0  # Limpiar precio unitario
+            else:
+                # Para otros tipos, usar precio unitario tradicional
+                self.price_unit = self.product_id.list_price
+                self.price_per_period = 0.0  # Limpiar precio por período
+    
+    @api.onchange('line_type')
+    def _onchange_line_type(self):
+        """Ajusta los campos de precio según el tipo de línea"""
+        if self.line_type == 'alquiler':
+            # Para alquiler, mover precio unitario a precio por período
+            if self.price_unit > 0 and self.price_per_period == 0:
+                self.price_per_period = self.price_unit
+                self.price_unit = 0.0
+        else:
+            # Para otros tipos, mover precio por período a precio unitario
+            if self.price_per_period > 0 and self.price_unit == 0:
+                self.price_unit = self.price_per_period
+                self.price_per_period = 0.0
     
     def action_transfer_to_order_lines(self):
         """Transfiere la línea del capítulo a las líneas del pedido"""
         self.ensure_one()
         sale_order = self.chapter_id.order_id
         
+        # Preparar descripción y precio según el tipo de línea
+        name = self.name
+        price_unit = self.price_unit
+        
+        if self.line_type == 'alquiler' and self.price_per_period > 0:
+            # Para alquiler, incluir información de períodos en la descripción
+            period_text = {
+                'day': 'día(s)',
+                'week': 'semana(s)', 
+                'month': 'mes(es)'
+            }.get(self.rental_period_type, 'período(s)')
+            
+            name += f" - {self.rental_periods} {period_text} a {self.price_per_period}€ por {self.rental_period_type == 'day' and 'día' or self.rental_period_type == 'week' and 'semana' or 'mes'}"
+            price_unit = self.rental_periods * self.price_per_period
+        
         # Crear línea en sale.order.line
         sale_line_vals = {
             'order_id': sale_order.id,
             'product_id': self.product_id.id if self.product_id else False,
-            'name': self.name,
+            'name': name,
             'product_uom_qty': self.product_uom_qty,
             'product_uom': self.product_uom.id if self.product_uom else False,
-            'price_unit': self.price_unit,
+            'price_unit': price_unit,
         }
         
         self.env['sale.order.line'].create(sale_line_vals)
