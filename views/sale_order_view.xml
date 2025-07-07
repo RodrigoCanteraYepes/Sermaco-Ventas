@@ -62,8 +62,8 @@
     </record>
 
     <!-- Vista de lista para Sale Order Chapter -->
-    <record id="view_sale_order_chapter_tree" model="ir.ui.view">
-        <field name="name">sale.order.chapter.tree</field>
+    <record id="view_sale_order_chapter_list" model="ir.ui.view">
+        <field name="name">sale.order.chapter.list</field>
         <field name="model">sale.order.chapter</field>
         <field name="arch" type="xml">
             <list string="Capítulos del Presupuesto">
@@ -244,7 +244,7 @@
     <record id="action_sale_order_chapter" model="ir.actions.act_window">
         <field name="name">Capítulos del Presupuesto</field>
         <field name="res_model">sale.order.chapter</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Crea tu primer capítulo del presupuesto
@@ -257,11 +257,11 @@
     </record>
     
     <!-- Vistas para Plantillas de Capítulos -->
-    <record id="view_chapter_template_tree" model="ir.ui.view">
-        <field name="name">sale.order.chapter.template.tree</field>
+    <record id="view_chapter_template_list" model="ir.ui.view">
+        <field name="name">sale.order.chapter.template.list</field>
         <field name="model">sale.order.chapter.template</field>
         <field name="arch" type="xml">
-            <tree string="Plantillas de Capítulos">
+            <list string="Plantillas de Capítulos">
                 <field name="name"/>
                 <field name="chapter_type"/>
                 <field name="user_id"/>
@@ -271,7 +271,7 @@
                         type="object" 
                         icon="fa-plus" 
                         class="btn-sm btn-success"/>
-            </tree>
+            </list>
         </field>
     </record>
     
@@ -322,7 +322,7 @@
     <record id="action_chapter_template" model="ir.actions.act_window">
         <field name="name">Plantillas de Capítulos</field>
         <field name="res_model">sale.order.chapter.template</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Crea tu primera plantilla de capítulo
