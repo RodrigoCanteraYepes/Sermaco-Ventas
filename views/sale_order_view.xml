@@ -93,10 +93,10 @@
                         <group>
                             <field name="product_uom_qty"/>
                             <field name="product_uom"/>
-                            <field name="price_unit" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
-                            <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                            <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                            <field name="price_per_period" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                            <field name="price_unit" invisible="line_type == 'alquiler'"/>
+                            <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                            <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                            <field name="price_per_period" invisible="line_type != 'alquiler'"/>
                             <field name="price_subtotal" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
@@ -166,13 +166,13 @@
                                         type="object" 
                                         icon="fa-minus" 
                                         class="btn-sm btn-secondary"
-                                        attrs="{'invisible': [('is_collapsed', '=', True)]}"/>
+                                        invisible="is_collapsed == True"/>
                                 <button name="action_toggle_collapse" 
                                         string="Expandir" 
                                         type="object" 
                                         icon="fa-plus" 
                                         class="btn-sm btn-secondary"
-                                        attrs="{'invisible': [('is_collapsed', '=', False)]}"/>
+                                        invisible="is_collapsed == False"/>
                                 <button name="action_add_suggested_products" 
                                         string="Añadir Sugeridos" 
                                         type="object" 
@@ -196,7 +196,7 @@
                                     </group>
                                     
                                     <notebook>
-                                        <page string="Líneas del Capítulo" attrs="{'invisible': [('is_collapsed', '=', True)]}">
+                                        <page string="Líneas del Capítulo" invisible="is_collapsed == True">
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
@@ -205,10 +205,10 @@
                                                     <field name="name"/>
                                                     <field name="product_uom_qty"/>
                                                     <field name="product_uom"/>
-                                                    <field name="price_unit" widget="monetary" attrs="{'invisible': [('line_type', '=', 'alquiler')]}"/>
-                                                    <field name="rental_period_type" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                                    <field name="rental_periods" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
-                                                    <field name="price_per_period" widget="monetary" attrs="{'invisible': [('line_type', '!=', 'alquiler')]}"/>
+                                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
+                                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
+                                                    <field name="rental_periods" invisible="line_type != 'alquiler'"/>
+                                                    <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
                                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                                     <field name="currency_id" invisible="1"/>
                                                     <button name="action_transfer_to_order_lines" 
