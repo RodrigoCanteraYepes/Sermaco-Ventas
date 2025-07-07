@@ -37,7 +37,7 @@
                             <field name="chapter_line_ids">
                                 <list editable="bottom" string="Líneas del Capítulo" default_group_by="line_type">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="line_type" invisible="1"/>
+                                    <field name="line_type"/>
                                     <field name="product_id"/>
                                     <field name="name"/>
                                     <field name="product_uom_qty"/>
@@ -141,28 +141,22 @@
                                         class="btn-primary me-2"
                                         icon="fa-plus"/>
                                 <button name="action_create_chapter_template" 
-                                        string="Crear Plantilla de Capítulos" 
+                                        string="Crear Capítulo con Productos Sugeridos" 
                                         type="object" 
                                         class="btn-secondary me-2"
                                         icon="fa-magic"/>
+                                <button name="action_apply_multiple_templates" 
+                                        string="Aplicar Plantillas" 
+                                        type="object" 
+                                        class="btn-info me-2"
+                                        icon="fa-magic"
+                                        groups="sales_team.group_sale_salesman"/>
                                 <button name="action_transfer_all_chapters_to_lines" 
                                         string="Transferir Todo a Líneas del Pedido" 
                                         type="object" 
                                         class="btn-warning"
                                         icon="fa-arrow-right"
                                         confirm="¿Está seguro de que desea transferir todas las líneas de capítulos a las líneas del pedido?"/>
-                            </div>
-                        </div>
-                        
-                        <!-- Botón para aplicar múltiples plantillas -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <button name="action_apply_multiple_templates" 
-                                        string="Aplicar Múltiples Plantillas" 
-                                        type="object" 
-                                        class="btn-primary me-2"
-                                        icon="fa-magic"
-                                        groups="sales_team.group_sale_salesman"/>
                             </div>
                         </div>
                         
@@ -215,7 +209,7 @@
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
-                                                    <field name="line_type" invisible="1"/>
+                                                    <field name="line_type"/>
                                                     <field name="product_id"/>
                                                     <field name="name"/>
                                                     <field name="product_uom_qty"/>
@@ -388,6 +382,32 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="context">{'default_sale_order_id': active_id}</field>
+    </record>
+
+    <!-- Herencia de las líneas del pedido para mostrar tipo de línea -->
+    <record id="view_order_line_tree_inherit_line_type" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.inherit.line.type</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="line_type" string="Tipo"/>
+                <field name="source_chapter_id" string="Capítulo Origen" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia del formulario de líneas del pedido -->
+    <record id="view_order_line_form_inherit_line_type" model="ir.ui.view">
+        <field name="name">sale.order.line.form.inherit.line.type</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="line_type"/>
+                <field name="source_chapter_id" readonly="1" invisible="source_chapter_id == False"/>
+            </xpath>
+        </field>
     </record>
 
 </odoo>

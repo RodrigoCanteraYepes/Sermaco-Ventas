@@ -382,6 +382,8 @@ class SaleOrderChapterLine(models.Model):
             'product_uom': self.product_uom.id if self.product_uom else False,
             'price_unit': price_unit,
             'tax_id': [(6, 0, self.tax_ids.ids)],
+            'line_type': self.line_type,
+            'source_chapter_id': self.chapter_id.id,
         }
         
         self.env['sale.order.line'].create(sale_line_vals)

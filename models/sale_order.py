@@ -3,6 +3,23 @@
 from odoo import models, fields, api, _
 
 
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+    
+    line_type = fields.Selection([
+        ('alquiler', 'Alquiler'),
+        ('montaje', 'Montaje'),
+        ('portes', 'Portes'),
+        ('otros', 'Otros Conceptos'),
+    ], string='Tipo de Línea', default='otros')
+    
+    source_chapter_id = fields.Many2one(
+        'sale.order.chapter',
+        string='Capítulo de Origen',
+        help='Capítulo desde el cual se transfirió esta línea'
+    )
+
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
@@ -46,14 +63,29 @@ class SaleOrder(models.Model):
         
         for chapter in self.chapter_ids:
             for line in chapter.chapter_line_ids:
+                # Preparar precio según el tipo de línea
+                price_unit = line.price_unit
+                name = line.name
+                
+                if line.line_type == 'alquiler' and line.price_per_period > 0:
+                    price_unit = line.price_per_period * line.rental_periods
+                    period_text = {
+                        'day': 'día(s)',
+                        'week': 'semana(s)',
+                        'month': 'mes(es)'
+                    }.get(line.rental_period_type, 'período(s)')
+                    name = f"{line.name} - {line.rental_periods} {period_text} x {line.price_per_period}€"
+                
                 # Crear línea en sale.order.line
                 sale_line_vals = {
                     'order_id': self.id,
                     'product_id': line.product_id.id if line.product_id else False,
-                    'name': f"[{chapter.name}] {line.name}",
+                    'name': f"[{chapter.name}] {name}",
                     'product_uom_qty': line.product_uom_qty,
                     'product_uom': line.product_uom.id if line.product_uom else False,
-                    'price_unit': line.price_unit,
+                    'price_unit': price_unit,
+                    'line_type': line.line_type,
+                    'source_chapter_id': chapter.id,
                 }
                 
                 self.env['sale.order.line'].create(sale_line_vals)
