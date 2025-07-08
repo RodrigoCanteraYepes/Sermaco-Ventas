@@ -13,6 +13,11 @@ class SaleOrderChapter(models.Model):
         string='Nombre del Capítulo',
         required=True
     )
+    
+    description = fields.Text(
+        string='Descripción'
+    )
+    
     # Campo chapter_type eliminado - ahora se usa line_type en cada línea
     
     order_id = fields.Many2one(
