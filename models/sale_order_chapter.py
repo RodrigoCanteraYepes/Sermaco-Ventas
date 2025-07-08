@@ -63,10 +63,31 @@ class SaleOrderChapter(models.Model):
         help='Fuerza un salto de página antes de este capítulo en el PDF'
     )
     
+    chapter_type = fields.Selection([
+        ('alquiler', 'Alquiler'),
+        ('montaje', 'Montaje'),
+        ('portes', 'Portes'),
+        ('otros', 'Otros Conceptos'),
+        ('mixto', 'Mixto')
+    ], string='Tipo de Capítulo', compute='_compute_chapter_type', store=True)
+    
     @api.depends('chapter_line_ids.price_subtotal')
     def _compute_total_amount(self):
         for chapter in self:
             chapter.total_amount = sum(chapter.chapter_line_ids.mapped('price_subtotal'))
+    
+    @api.depends('chapter_line_ids.line_type')
+    def _compute_chapter_type(self):
+        for chapter in self:
+            line_types = chapter.chapter_line_ids.mapped('line_type')
+            unique_types = list(set(line_types))
+            
+            if len(unique_types) == 0:
+                chapter.chapter_type = 'otros'
+            elif len(unique_types) == 1:
+                chapter.chapter_type = unique_types[0]
+            else:
+                chapter.chapter_type = 'mixto'
     
     @api.model
     def create(self, vals):

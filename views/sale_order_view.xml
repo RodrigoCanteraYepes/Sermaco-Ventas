@@ -89,7 +89,9 @@
                         <field name="chapter_ids" nolabel="1">
                             <list string="Capítulos" editable="bottom">
                                 <field name="sequence" widget="handle"/>
-                                <field name="name"/>
+                                <field name="name" string="Nombre de Producto"/>
+                                <field name="description" string="Descripción"/>
+                                <field name="chapter_type" string="Tipo"/>
                                 <field name="is_collapsed" invisible="1"/>
                                 <field name="total_amount" widget="monetary" sum="Total"/>
                                 <field name="currency_id" invisible="1"/>
@@ -120,6 +122,7 @@
                                         <group>
                                             <field name="name"/>
                                             <field name="description"/>
+                                            <field name="chapter_type"/>
                                             <field name="sequence"/>
                                             <field name="is_collapsed"/>
                                         </group>
