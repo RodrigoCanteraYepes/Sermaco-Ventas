@@ -115,13 +115,7 @@
                                         icon="fa-magic" 
                                         class="btn-sm btn-secondary"
                                         help="Añade productos recomendados basados en el tipo de capítulo"/>
-                                <button name="unlink" 
-                                        string="Eliminar" 
-                                        type="object" 
-                                        icon="fa-trash" 
-                                        class="btn-sm btn-danger"
-                                        confirm="¿Está seguro de que desea eliminar este capítulo?"
-                                        help="Elimina el capítulo y todas sus líneas"/>
+
                             </list>
                             <form string="Capítulo">
                                 <sheet>
@@ -162,13 +156,7 @@
                                                             type="object" 
                                                             icon="fa-arrow-right" 
                                                             class="btn-sm btn-warning"/>
-                                                    <button name="unlink" 
-                                                            string="Eliminar" 
-                                                            type="object" 
-                                                            icon="fa-trash" 
-                                                            class="btn-sm btn-danger"
-                                                            confirm="¿Está seguro de que desea eliminar esta línea?"
-                                                            help="Elimina la línea del capítulo"/>
+
                                                 </list>
                                             </field>
                                             <div class="oe_clear mt-2">
