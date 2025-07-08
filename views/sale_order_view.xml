@@ -223,7 +223,6 @@
                             <field name="user_id"/>
                         </group>
                     </group>
-                    <field name="description"/>
                     <notebook>
                         <page string="Líneas de la Plantilla">
                             <field name="template_line_ids">
