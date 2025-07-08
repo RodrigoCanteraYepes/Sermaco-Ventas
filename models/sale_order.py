@@ -47,6 +47,12 @@ class SaleOrder(models.Model):
         help='Campo temporal para crear capítulos inline'
     )
     
+    collapsed_chapters_in_lines = fields.Boolean(
+        string='Capítulos Colapsados en Líneas',
+        default=False,
+        help='Indica si los capítulos están colapsados en las líneas del pedido'
+    )
+    
     @api.depends('chapter_ids.total_amount')
     def _compute_chapters_total(self):
         for order in self:
