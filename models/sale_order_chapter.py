@@ -621,7 +621,7 @@ class SaleOrderChapterTemplateLine(models.Model):
         ('montaje', 'Montaje'),
         ('portes', 'Portes'),
         ('otros', 'Otros Conceptos')
-    ], string='Tipo de Línea', required=True)
+    ], string='Tipo de Línea', required=True, default='otros')
     
     product_id = fields.Many2one(
         'product.product',
