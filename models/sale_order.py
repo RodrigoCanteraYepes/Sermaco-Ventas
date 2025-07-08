@@ -18,6 +18,12 @@ class SaleOrderLine(models.Model):
         string='Capítulo de Origen',
         help='Capítulo desde el cual se transfirió esta línea'
     )
+    
+    chapter_name = fields.Char(
+        string='Nombre del Capítulo',
+        related='source_chapter_id.name',
+        readonly=True
+    )
 
 
 class SaleOrder(models.Model):
