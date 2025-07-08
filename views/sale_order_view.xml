@@ -26,10 +26,10 @@
                         <group>
                             <field name="product_uom_qty"/>
                             <field name="product_uom"/>
-                            <field name="price_unit" invisible="line_type == 'alquiler'"/>
-                            <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
-                             <field name="rental_periods" invisible="line_type != 'alquiler'"/>
-                             <field name="price_per_period" invisible="line_type != 'alquiler'"/>
+                            <field name="price_unit" column_invisible="line_type == 'alquiler'"/>
+                            <field name="rental_period_type" column_invisible="line_type != 'alquiler'"/>
+                             <field name="rental_periods" column_invisible="line_type != 'alquiler'"/>
+                             <field name="price_per_period" column_invisible="line_type != 'alquiler'"/>
                             <field name="tax_ids" widget="many2many_tags"/>
                             <field name="price_subtotal" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
@@ -59,7 +59,7 @@
                                             string="Crear Capítulo" 
                                             type="object" 
                                             class="btn-primary"
-                                            invisible="new_chapter_name == False"/>
+                                            invisible="not new_chapter_name"/>
                                 </group>
                             </div>
                             <div class="col-6">
@@ -98,14 +98,14 @@
                                         type="object" 
                                         icon="fa-minus" 
                                         class="btn-sm btn-secondary"
-                                        invisible="is_collapsed == True"
+                                        invisible="is_collapsed"
                                         help="Oculta las líneas del capítulo para una vista más compacta"/>
                                 <button name="action_toggle_collapse" 
                                         string="Expandir" 
                                         type="object" 
                                         icon="fa-plus" 
                                         class="btn-sm btn-secondary"
-                                        invisible="is_collapsed == False"
+                                        invisible="not is_collapsed"
                                         help="Muestra las líneas del capítulo"/>
                                 <button name="action_add_suggested_products" 
                                         string="Añadir Sugeridos" 
@@ -130,7 +130,7 @@
                                     </group>
                                     
                                     <notebook>
-                                        <page string="Líneas del Capítulo" invisible="is_collapsed == True">
+                                        <page string="Líneas del Capítulo" invisible="is_collapsed">
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
@@ -139,10 +139,10 @@
                                                     <field name="name"/>
                                                     <field name="product_uom_qty"/>
                                                     <field name="product_uom"/>
-                                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler'"/>
-                                                    <field name="rental_period_type" invisible="line_type != 'alquiler'"/>
-                                                     <field name="rental_periods" invisible="line_type != 'alquiler'"/>
-                                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler'"/>
+                                                    <field name="price_unit" widget="monetary" column_invisible="line_type == 'alquiler'"/>
+                                                    <field name="rental_period_type" column_invisible="line_type != 'alquiler'"/>
+                                                     <field name="rental_periods" column_invisible="line_type != 'alquiler'"/>
+                                                     <field name="price_per_period" widget="monetary" column_invisible="line_type != 'alquiler'"/>
                                                     <field name="tax_ids" widget="many2many_tags"/>
                                                     <field name="price_subtotal" widget="monetary" sum="Total"/>
                                                     <field name="currency_id" invisible="1"/>
@@ -244,70 +244,27 @@
             </form>
         </field>
     </record>
-    
-    <record id="action_chapter_template" model="ir.actions.act_window">
+
+    <!-- Acción para abrir plantillas de capítulos -->
+    <record id="action_chapter_templates" model="ir.actions.act_window">
         <field name="name">Plantillas de Capítulos</field>
         <field name="res_model">sale.order.chapter.template</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Crea tu primera plantilla de capítulo
+                Crear una nueva plantilla de capítulo
             </p>
             <p>
-                Las plantillas te permiten reutilizar configuraciones de capítulos
-                sin modificar la plantilla original.
+                Las plantillas de capítulos te permiten crear rápidamente capítulos con productos predefinidos.
             </p>
         </field>
     </record>
-    
-    <!-- Menú para Plantillas -->
+
+    <!-- Menú para plantillas de capítulos -->
     <menuitem id="menu_chapter_templates"
               name="Plantillas de Capítulos"
               parent="sale.sale_menu_root"
-              action="action_chapter_template"
-              sequence="20"
-              groups="sales_team.group_sale_salesman"/>
-
-    <!-- Vista del wizard para aplicar múltiples plantillas -->
-    <record id="view_chapter_template_wizard" model="ir.ui.view">
-        <field name="name">chapter.template.wizard.form</field>
-        <field name="model">chapter.template.wizard</field>
-        <field name="arch" type="xml">
-            <form string="Aplicar Múltiples Plantillas">
-                <group>
-                    <field name="sale_order_id" invisible="1"/>
-                    <field name="template_ids" widget="many2many_tags" domain="[]"/>
-                </group>
-                <footer>
-                    <button name="action_apply_templates" string="Aplicar Plantillas" type="object" class="btn-primary"/>
-                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
-                </footer>
-            </form>
-        </field>
-    </record>
-
-    <!-- Acción del wizard -->
-    <record id="action_chapter_template_wizard" model="ir.actions.act_window">
-        <field name="name">Aplicar Múltiples Plantillas</field>
-        <field name="res_model">chapter.template.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="context">{'default_sale_order_id': active_id}</field>
-    </record>
-
-    <!-- Herencia de las líneas del pedido para mostrar tipo de línea -->
-    <record id="view_order_line_tree_inherit_line_type" model="ir.ui.view">
-        <field name="name">sale.order.line.tree.inherit.line.type</field>
-        <field name="model">sale.order.line</field>
-        <field name="inherit_id" ref="sale.view_order_line_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="line_type" string="Tipo"/>
-                <field name="source_chapter_id" string="Capítulo Origen" optional="hide"/>
-            </xpath>
-        </field>
-    </record>
-
-
+              action="action_chapter_templates"
+              sequence="20"/>
 
 </odoo>
