@@ -133,22 +133,24 @@
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
                                                     <field name="line_type"/>
-                                                    <field name="product_id"/>
-                                                    <field name="name"/>
-                                                    <field name="product_uom_qty"/>
-                                                    <field name="product_uom"/>
-                                                    <field name="price_unit" widget="monetary" column_invisible="line_type == 'alquiler'"/>
-                                                    <field name="rental_period_type" column_invisible="line_type != 'alquiler'"/>
-                                                     <field name="rental_periods" column_invisible="line_type != 'alquiler'"/>
-                                                     <field name="price_per_period" widget="monetary" column_invisible="line_type != 'alquiler'"/>
-                                                    <field name="tax_ids" widget="many2many_tags"/>
-                                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
+                                                    <field name="is_fixed" string="Línea Fija"/>
+                                                    <field name="product_id" column_invisible="is_fixed"/>
+                                                    <field name="name" decoration-bf="is_fixed"/>
+                                                    <field name="product_uom_qty" column_invisible="is_fixed"/>
+                                                    <field name="product_uom" column_invisible="is_fixed"/>
+                                                    <field name="price_unit" widget="monetary" column_invisible="line_type == 'alquiler' or is_fixed"/>
+                                                    <field name="rental_period_type" column_invisible="line_type != 'alquiler' or is_fixed"/>
+                                                     <field name="rental_periods" column_invisible="line_type != 'alquiler' or is_fixed"/>
+                                                     <field name="price_per_period" widget="monetary" column_invisible="line_type != 'alquiler' or is_fixed"/>
+                                                    <field name="tax_ids" widget="many2many_tags" column_invisible="is_fixed"/>
+                                                    <field name="price_subtotal" widget="monetary" sum="Total" column_invisible="is_fixed"/>
                                                     <field name="currency_id" invisible="1"/>
                                                     <button name="action_transfer_to_order_lines" 
                                                             string="Transferir" 
                                                             type="object" 
                                                             icon="fa-arrow-right" 
-                                                            class="btn-sm btn-warning"/>
+                                                            class="btn-sm btn-warning"
+                                                            column_invisible="is_fixed"/>
 
                                                 </list>
                                             </field>
@@ -226,12 +228,12 @@
                             <field name="sequence" widget="handle"/>
                             <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
-                            <field name="product_id"/>
+                            <field name="product_id" column_invisible="is_fixed"/>
                             <field name="name" decoration-bf="is_fixed"/>
-                            <field name="product_uom_qty"/>
-                            <field name="product_uom"/>
-                            <field name="price_unit" widget="monetary"/>
-                            <field name="tax_ids" widget="many2many_tags"/>
+                            <field name="product_uom_qty" column_invisible="is_fixed"/>
+                            <field name="product_uom" column_invisible="is_fixed"/>
+                            <field name="price_unit" widget="monetary" column_invisible="is_fixed"/>
+                            <field name="tax_ids" widget="many2many_tags" column_invisible="is_fixed"/>
                         </list>
                     </field>
                 </sheet>

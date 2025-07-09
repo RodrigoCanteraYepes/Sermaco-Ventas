@@ -208,6 +208,12 @@ class SaleOrderChapterLine(models.Model):
         ('otros', 'Otros Conceptos')
     ], string='Tipo de Línea', required=True, default='alquiler')
     
+    is_fixed = fields.Boolean(
+        string='Línea Fija',
+        default=False,
+        help='Indica si es una línea de sección que aparece en negrita sin otros campos'
+    )
+    
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
@@ -527,6 +533,7 @@ class SaleOrderChapterTemplate(models.Model):
                 'chapter_id': chapter.id,
                 'sequence': template_line.sequence,
                 'line_type': template_line.line_type,
+                'is_fixed': template_line.is_fixed,
                 'product_id': template_line.product_id.id if template_line.product_id else False,
                 'name': template_line.name,
                 'product_uom_qty': template_line.product_uom_qty,
