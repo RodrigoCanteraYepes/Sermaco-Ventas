@@ -144,28 +144,7 @@ class SaleOrder(models.Model):
             }
         }
     
-    def action_create_chapter_template(self):
-        """Crea un capítulo con productos sugeridos"""
-        self.ensure_one()
-        
-        # Crear un capítulo general
-        chapter = self.env['sale.order.chapter'].create({
-            'order_id': self.id,
-            'name': _('Capítulo General'),
-            'sequence': (len(self.chapter_ids) + 1) * 10
-        })
-        # Añadir productos sugeridos
-        chapter.action_add_suggested_products()
-        
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Éxito'),
-                'message': _('Capítulo con productos sugeridos creado exitosamente'),
-                'type': 'success',
-            }
-        }
+
     
     def action_apply_multiple_templates(self):
         """Abrir wizard para aplicar múltiples plantillas"""

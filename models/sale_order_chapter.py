@@ -45,6 +45,18 @@ class SaleOrderChapter(models.Model):
         currency_field='currency_id'
     )
     
+    manual_total = fields.Monetary(
+        string='Precio Total Manual',
+        currency_field='currency_id',
+        help='Precio total manual del capítulo. Si se establece, se usará en lugar del total calculado.'
+    )
+    
+    use_manual_total = fields.Boolean(
+        string='Usar Precio Manual',
+        default=False,
+        help='Si está marcado, se usará el precio manual en lugar del total calculado'
+    )
+    
     currency_id = fields.Many2one(
         related='order_id.currency_id',
         store=True,
@@ -71,10 +83,13 @@ class SaleOrderChapter(models.Model):
         ('mixto', 'Mixto')
     ], string='Tipo de Capítulo', default='otros')
     
-    @api.depends('chapter_line_ids.price_subtotal')
+    @api.depends('chapter_line_ids.price_subtotal', 'manual_total', 'use_manual_total')
     def _compute_total_amount(self):
         for chapter in self:
-            chapter.total_amount = sum(chapter.chapter_line_ids.mapped('price_subtotal'))
+            if chapter.use_manual_total and chapter.manual_total:
+                chapter.total_amount = chapter.manual_total
+            else:
+                chapter.total_amount = sum(chapter.chapter_line_ids.mapped('price_subtotal'))
     
 
     
@@ -84,74 +99,7 @@ class SaleOrderChapter(models.Model):
             vals['name'] = _('Nuevo Capítulo')
         return super().create(vals)
     
-    def action_add_suggested_products(self):
-        """Añade productos sugeridos según el tipo de capítulo"""
-        self.ensure_one()
-        suggested_products = self._get_suggested_products()
-        
-        for product_data in suggested_products:
-            self.env['sale.order.chapter.line'].create({
-                'chapter_id': self.id,
-                'product_id': product_data.get('product_id'),
-                'name': product_data.get('name', ''),
-                'product_uom_qty': product_data.get('qty', 1.0),
-                'price_unit': product_data.get('price', 0.0),
-                'line_type': product_data.get('line_type', 'alquiler'),
-            })
-    
-    def _get_suggested_products(self):
-        """Retorna productos sugeridos generales"""
-        suggestions = [
-            {
-                'name': _('ALQUILER PLATAFORMA DE CREMALLERA BIMASTIL 30 MT'),
-                'qty': 1.0,
-                'price': 875.0,
-                'line_type': 'alquiler'
-            },
-            {
-                'name': _('SEGURO'),
-                'qty': 1.0,
-                'price': 60.0,
-                'line_type': 'alquiler'
-            },
-            {
-                'name': _('MONTAJE INICIAL BIMASTIL, ALTURA 30 MT'),
-                'qty': 1.0,
-                'price': 1050.0,
-                'line_type': 'montaje'
-            },
-            {
-                'name': _('DESMONTAJE FINAL BIMASTIL, ALTURA 30 MT'),
-                'qty': 1.0,
-                'price': 1050.0,
-                'line_type': 'montaje'
-            },
-            {
-                'name': _('PORTE DE ENTREGA (Se estiman 2 portes. Unidad 250 €)'),
-                'qty': 2.0,
-                'price': 250.0,
-                'line_type': 'portes'
-            },
-            {
-                'name': _('PORTE DE RETIRADA (Se estiman 2 portes. Unidad 250 €)'),
-                'qty': 2.0,
-                'price': 250.0,
-                'line_type': 'portes'
-            },
-            {
-                'name': _('GESTIÓN DE CARGA Y DESCARGA'),
-                'qty': 1.0,
-                'price': 50.0,
-                'line_type': 'otros'
-            },
-            {
-                'name': _('CERTIFICADO DE MONTAJE'),
-                'qty': 1.0,
-                'price': 150.0,
-                'line_type': 'otros'
-            }
-        ]
-        return suggestions
+
     
     def action_save_as_template(self):
         """Guarda el capítulo actual como plantilla"""

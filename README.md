@@ -25,7 +25,7 @@ Esta versión incluye todas las correcciones identificadas en la revisión inici
   - Portes
   - Otros Conceptos
 - **Gestión de líneas por capítulo** con productos, cantidades y precios
-- **Productos sugeridos** para cada tipo de capítulo
+- **Precio manual del capítulo** para establecer un total fijo independiente de las líneas
 - **Transferencia automática** de líneas de capítulos a líneas del pedido
 - **Plantillas predefinidas** para crear todos los capítulos de una vez
 - **Cálculo automático** de totales por capítulo
@@ -69,11 +69,12 @@ sale_order_chapters/
 - `sequence`: Orden de visualización (Integer)
 - `chapter_line_ids`: Líneas del capítulo (One2many)
 - `total_amount`: Total calculado del capítulo (Monetary)
+- `manual_total`: Precio total manual del capítulo (Monetary)
+- `use_manual_total`: Activar precio manual en lugar del calculado (Boolean)
 - `currency_id`: Moneda (Many2one)
 
 **Métodos principales:**
-- `action_add_suggested_products()`: Añade productos sugeridos generales
-- `_get_suggested_products()`: Retorna lista de productos sugeridos
+
 
 ### 2. `sale.order.chapter.line`
 **Descripción:** Líneas individuales dentro de cada capítulo.
@@ -104,14 +105,14 @@ sale_order_chapters/
 **Métodos añadidos:**
 - `action_add_chapter()`: Abre formulario para añadir nuevo capítulo
 - `action_transfer_all_chapters_to_lines()`: Transfiere todas las líneas de capítulos
-- `action_create_chapter_template()`: Crea un capítulo con productos sugeridos
+
 
 ## Vistas Implementadas
 
 ### 1. Vista de Formulario de Capítulo
 - Formulario completo para gestionar capítulos
 - Notebook con líneas del capítulo editables
-- Botón para añadir productos sugeridos
+
 
 ### 2. Vista de Lista de Capítulos
 - Lista ordenable con handle de secuencia
@@ -164,28 +165,17 @@ sale_order_chapters/
 
 ### Gestión de Líneas
 1. **Hacer doble clic en un capítulo para editarlo**
-2. **Añadir líneas manualmente o usar "Añadir Productos Sugeridos"**
+2. **Añadir líneas manualmente**
 3. **Configurar cantidades, precios y descripciones**
-4. **Usar "Transferir" para mover líneas individuales al pedido principal**
+4. **Activar "Usar Precio Manual" para establecer un total fijo del capítulo**
+5. **Usar "Transferir" para mover líneas individuales al pedido principal**
 
 ### Transferencia Masiva
 1. **Usar "Transferir Todo a Líneas del Pedido" para mover todas las líneas**
 2. **Confirmar la acción en el diálogo de confirmación**
 3. **Las líneas se añadirán al pedido principal manteniendo la organización**
 
-### Productos Sugeridos por Capítulo
 
-**Alquiler:**
-- ALQUILER PLATAFORMA DE CREMALLERA BIMASTIL 30 MT
-
-**Montaje:**
-- MONTAJE INICIAL BIMASTIL
-
-**Portes:**
-- TRANSPORTE Y PORTES
-
-**Otros Conceptos:**
-- OTROS CONCEPTOS
 
 ## Personalización
 
@@ -203,21 +193,7 @@ line_type = fields.Selection([
 ], string='Tipo de Línea', required=True, default='alquiler')
 ```
 
-### Modificar Productos Sugeridos
 
-En el método `_get_suggested_products()`, añadir o modificar las sugerencias:
-
-```python
-suggested_products = [
-    {
-        'name': _('NUEVO PRODUCTO SUGERIDO'),
-        'qty': 1.0,
-        'price': 100.0,
-        'line_type': 'alquiler'
-    },
-    # ... más productos
-]
-```
 
 ## Seguridad
 
@@ -229,10 +205,7 @@ El módulo incluye permisos para:
 
 ### Métodos Principales
 - `action_add_chapter()`: Abre formulario para nuevo capítulo
-- `action_create_chapter_template()`: Crea un capítulo con productos sugeridos
 - `action_transfer_all_chapters_to_lines()`: Transfiere todas las líneas al pedido
-- `action_add_suggested_products()`: Añade productos sugeridos por tipo
-- `_get_suggested_products()`: Lógica de productos sugeridos generales (personalizable)
 
 ### Validaciones y Cálculos
 - Cálculo automático de subtotales por línea
