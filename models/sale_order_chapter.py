@@ -527,21 +527,60 @@ class SaleOrderChapterTemplate(models.Model):
         
         chapter = self.env['sale.order.chapter'].create(chapter_vals)
         
-        # Crear todas las líneas de la plantilla en el capítulo
+        # Obtener tipos de línea únicos que no son fijas en la plantilla
+        line_types_in_template = set()
         for template_line in self.template_line_ids:
-            line_vals = {
+            if not template_line.is_fixed:
+                line_types_in_template.add(template_line.line_type)
+        
+        # Crear líneas de sección automáticas para alquiler y montaje si existen en la plantilla
+        section_sequence = 10
+        if 'alquiler' in line_types_in_template:
+            # Crear línea de sección de alquiler con el nombre de la plantilla
+            self.env['sale.order.chapter.line'].create({
                 'chapter_id': chapter.id,
-                'sequence': template_line.sequence,
-                'line_type': template_line.line_type,
-                'is_fixed': template_line.is_fixed,
-                'product_id': template_line.product_id.id if template_line.product_id else False,
-                'name': template_line.name,
-                'product_uom_qty': template_line.product_uom_qty,
-                'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                'price_unit': template_line.price_unit,
-                'tax_ids': [(6, 0, template_line.tax_ids.ids)],
-            }
-            self.env['sale.order.chapter.line'].create(line_vals)
+                'sequence': section_sequence,
+                'line_type': 'alquiler',
+                'is_fixed': True,
+                'name': f'{self.name} - Alquiler',
+                'product_uom_qty': 1.0,
+                'product_uom': self.env.ref('uom.product_uom_unit').id,
+                'price_unit': 0.0,
+            })
+            section_sequence += 10
+        
+        if 'montaje' in line_types_in_template:
+            # Crear línea de sección de montaje y desmontaje con el nombre de la plantilla
+            self.env['sale.order.chapter.line'].create({
+                'chapter_id': chapter.id,
+                'sequence': section_sequence,
+                'line_type': 'montaje',
+                'is_fixed': True,
+                'name': f'{self.name} - Montaje y Desmontaje',
+                'product_uom_qty': 1.0,
+                'product_uom': self.env.ref('uom.product_uom_unit').id,
+                'price_unit': 0.0,
+            })
+            section_sequence += 10
+        
+        # Crear todas las líneas de la plantilla en el capítulo (ajustando secuencias)
+        for template_line in self.template_line_ids:
+            # Solo crear líneas que no sean fijas (las fijas ya las creamos arriba)
+            if not template_line.is_fixed:
+                line_vals = {
+                    'chapter_id': chapter.id,
+                    'sequence': section_sequence,
+                    'line_type': template_line.line_type,
+                    'is_fixed': template_line.is_fixed,
+                    'product_id': template_line.product_id.id if template_line.product_id else False,
+                    'name': template_line.name,
+                    'product_uom_qty': template_line.product_uom_qty,
+                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                    'price_unit': template_line.price_unit,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+                }
+                self.env['sale.order.chapter.line'].create(line_vals)
+                section_sequence += 10
         
         # Mostrar mensaje de éxito y cerrar la ventana
         return {
