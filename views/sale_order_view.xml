@@ -217,11 +217,57 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Líneas de la Plantilla">
-                            <field name="template_line_ids">
-                                <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
+                        <page string="Sección Alquiler">
+                            <field name="alquiler_section_ids" context="{'default_line_type': 'alquiler'}">
+                                <list editable="bottom" string="Líneas de Alquiler">
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sección Montaje">
+                            <field name="montaje_section_ids" context="{'default_line_type': 'montaje'}">
+                                <list editable="bottom" string="Líneas de Montaje">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sección Portes">
+                            <field name="portes_section_ids" context="{'default_line_type': 'portes'}">
+                                <list editable="bottom" string="Líneas de Portes">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sección Otros Conceptos">
+                            <field name="otros_section_ids" context="{'default_line_type': 'otros'}">
+                                <list editable="bottom" string="Líneas de Otros Conceptos">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed"/>
                                     <field name="product_id"/>
                                     <field name="name"/>
                                     <field name="product_uom_qty"/>

@@ -457,6 +457,35 @@ class SaleOrderChapterTemplate(models.Model):
         string='Líneas de la Plantilla'
     )
     
+    # Secciones fijas
+    alquiler_section_ids = fields.One2many(
+        'sale.order.chapter.template.line',
+        'template_id',
+        string='Sección Alquiler',
+        domain=[('line_type', '=', 'alquiler')]
+    )
+    
+    montaje_section_ids = fields.One2many(
+        'sale.order.chapter.template.line',
+        'template_id',
+        string='Sección Montaje',
+        domain=[('line_type', '=', 'montaje')]
+    )
+    
+    portes_section_ids = fields.One2many(
+        'sale.order.chapter.template.line',
+        'template_id',
+        string='Sección Portes',
+        domain=[('line_type', '=', 'portes')]
+    )
+    
+    otros_section_ids = fields.One2many(
+        'sale.order.chapter.template.line',
+        'template_id',
+        string='Sección Otros Conceptos',
+        domain=[('line_type', '=', 'otros')]
+    )
+    
     active = fields.Boolean(
         string='Activo',
         default=True
@@ -469,76 +498,94 @@ class SaleOrderChapterTemplate(models.Model):
         readonly=True
     )
     
-    def action_apply_template(self):
-        """Aplica la plantilla a un capítulo nuevo o existente"""
+    @api.model
+    def create(self, vals):
+        """Crear plantilla con secciones fijas iniciales"""
+        template = super().create(vals)
+        template._create_default_sections()
+        return template
+    
+    def _create_default_sections(self):
+        """Crea las 4 secciones fijas por defecto"""
         self.ensure_one()
         
-        # Verificar si hay un chapter_id en el contexto (cargar en capítulo existente)
-        chapter_id = self.env.context.get('chapter_id')
+        # Solo crear si no existen líneas
+        if not self.template_line_ids:
+            sections = [
+                {'line_type': 'alquiler', 'sequence': 10},
+                {'line_type': 'montaje', 'sequence': 20},
+                {'line_type': 'portes', 'sequence': 30},
+                {'line_type': 'otros', 'sequence': 40},
+            ]
+            
+            for section in sections:
+                self.env['sale.order.chapter.template.line'].create({
+                    'template_id': self.id,
+                    'line_type': section['line_type'],
+                    'sequence': section['sequence'],
+                    'name': f'Línea de {section["line_type"].title()}',
+                    'product_uom_qty': 1.0,
+                    'price_unit': 0.0,
+                    'is_fixed': True,
+                })
+    
+    def action_apply_template(self):
+        """Aplica la plantilla creando múltiples capítulos según las secciones"""
+        self.ensure_one()
         
-        if chapter_id:
-            # Cargar en capítulo existente
-            chapter = self.env['sale.order.chapter'].browse(chapter_id)
-            
-            # Limpiar líneas existentes si el usuario lo confirma
-            if chapter.chapter_line_ids:
-                chapter.chapter_line_ids.unlink()
-            
-            # Crear las líneas del capítulo basadas en la plantilla
-            for template_line in self.template_line_ids:
-                line_vals = {
-                    'chapter_id': chapter.id,
-                    'sequence': template_line.sequence,
-                    'line_type': template_line.line_type,
-                    'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.name,
-                    'product_uom_qty': template_line.product_uom_qty,
-                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                    'price_unit': template_line.price_unit,
-                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+        sale_order_id = self.env.context.get('active_id')
+        if not sale_order_id:
+            raise ValidationError(_('No se puede determinar el presupuesto de venta.'))
+        
+        created_chapters = []
+        
+        # Crear capítulos para cada sección que tenga líneas
+        sections_to_create = [
+            ('alquiler', f'ALQUILER {self.name}', self.alquiler_section_ids),
+            ('montaje', f'MONTAJE {self.name}', self.montaje_section_ids),
+            ('montaje', f'DESMONTAJE {self.name}', self.montaje_section_ids),  # Crear también desmontaje
+            ('portes', f'PORTES {self.name}', self.portes_section_ids),
+            ('otros', f'OTROS CONCEPTOS {self.name}', self.otros_section_ids),
+        ]
+        
+        for section_type, chapter_name, section_lines in sections_to_create:
+            if section_lines:
+                # Crear el capítulo
+                chapter_vals = {
+                    'name': chapter_name,
+                    'order_id': sale_order_id,
+                    'chapter_type': section_type,
                 }
-                self.env['sale.order.chapter.line'].create(line_vals)
-            
-            return {
-                'type': 'ir.actions.act_window_close',
-            }
-        else:
-            # Crear nuevo capítulo
-            sale_order_id = self.env.context.get('active_id')
-            if not sale_order_id:
-                raise ValidationError(_('No se puede determinar el presupuesto de venta.'))
-            
-            # Crear el capítulo basado en la plantilla
-            chapter_vals = {
-                'name': self.name,
-                'order_id': sale_order_id,
-            }
-            
-            chapter = self.env['sale.order.chapter'].create(chapter_vals)
-            
-            # Crear las líneas del capítulo basadas en la plantilla
-            for template_line in self.template_line_ids:
-                line_vals = {
-                    'chapter_id': chapter.id,
-                    'sequence': template_line.sequence,
-                    'line_type': template_line.line_type,
-                    'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.name,
-                    'product_uom_qty': template_line.product_uom_qty,
-                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                    'price_unit': template_line.price_unit,
-                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
-                }
-                self.env['sale.order.chapter.line'].create(line_vals)
-            
+                
+                chapter = self.env['sale.order.chapter'].create(chapter_vals)
+                created_chapters.append(chapter.id)
+                
+                # Crear las líneas del capítulo
+                for template_line in section_lines:
+                    line_vals = {
+                        'chapter_id': chapter.id,
+                        'sequence': template_line.sequence,
+                        'line_type': template_line.line_type,
+                        'product_id': template_line.product_id.id if template_line.product_id else False,
+                        'name': template_line.name,
+                        'product_uom_qty': template_line.product_uom_qty,
+                        'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                        'price_unit': template_line.price_unit,
+                        'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+                    }
+                    self.env['sale.order.chapter.line'].create(line_vals)
+        
+        if created_chapters:
             return {
                 'type': 'ir.actions.act_window',
-                'name': _('Capítulo creado desde plantilla'),
-                'res_model': 'sale.order.chapter',
-                'res_id': chapter.id,
+                'name': _('Presupuesto de Venta'),
+                'res_model': 'sale.order',
+                'res_id': sale_order_id,
                 'view_mode': 'form',
                 'target': 'current',
             }
+        else:
+            raise ValidationError(_('No se encontraron líneas en las secciones para crear capítulos.'))
     
     def unlink(self):
         """Control de permisos para eliminar plantillas"""
@@ -569,7 +616,13 @@ class SaleOrderChapterTemplateLine(models.Model):
         ('montaje', 'Montaje'),
         ('portes', 'Portes'),
         ('otros', 'Otros Conceptos')
-    ], string='Tipo de Línea', required=True, default='otros')
+    ], string='Tipo de Sección', required=True, default='otros')
+    
+    is_fixed = fields.Boolean(
+        string='Línea Fija',
+        default=False,
+        help='Si está marcado, esta línea aparecerá automáticamente en todas las plantillas nuevas'
+    )
     
     product_id = fields.Many2one(
         'product.product',
@@ -605,6 +658,14 @@ class SaleOrderChapterTemplateLine(models.Model):
         string='Impuestos',
         domain=[('type_tax_use', '=', 'sale')]
     )
+    
+    @api.model
+    def create(self, vals):
+        """Asegurar que el line_type se establece correctamente según la sección"""
+        # Si se está creando desde una sección específica, establecer el line_type correcto
+        if self.env.context.get('default_line_type'):
+            vals['line_type'] = self.env.context.get('default_line_type')
+        return super().create(vals)
     
     @api.onchange('product_id')
     def _onchange_product_id(self):
