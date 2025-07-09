@@ -216,9 +216,9 @@
                             <field name="user_id"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Sección Alquiler">
-                            <field name="alquiler_section_ids" context="{'default_line_type': 'alquiler'}">
+                    <group>
+                        <group string="Alquiler">
+                            <field name="alquiler_section_ids" context="{'default_line_type': 'alquiler'}" nolabel="1">
                                 <list editable="bottom" string="Líneas de Alquiler">
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1"/>
@@ -231,9 +231,9 @@
                                     <field name="tax_ids" widget="many2many_tags"/>
                                 </list>
                             </field>
-                        </page>
-                        <page string="Sección Montaje">
-                            <field name="montaje_section_ids" context="{'default_line_type': 'montaje'}">
+                        </group>
+                        <group string="Montaje">
+                            <field name="montaje_section_ids" context="{'default_line_type': 'montaje'}" nolabel="1">
                                 <list editable="bottom" string="Líneas de Montaje">
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1"/>
@@ -246,9 +246,9 @@
                                     <field name="tax_ids" widget="many2many_tags"/>
                                 </list>
                             </field>
-                        </page>
-                        <page string="Sección Portes">
-                            <field name="portes_section_ids" context="{'default_line_type': 'portes'}">
+                        </group>
+                        <group string="Portes">
+                            <field name="portes_section_ids" context="{'default_line_type': 'portes'}" nolabel="1">
                                 <list editable="bottom" string="Líneas de Portes">
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1"/>
@@ -261,9 +261,9 @@
                                     <field name="tax_ids" widget="many2many_tags"/>
                                 </list>
                             </field>
-                        </page>
-                        <page string="Sección Otros Conceptos">
-                            <field name="otros_section_ids" context="{'default_line_type': 'otros'}">
+                        </group>
+                        <group string="Otros Conceptos">
+                            <field name="otros_section_ids" context="{'default_line_type': 'otros'}" nolabel="1">
                                 <list editable="bottom" string="Líneas de Otros Conceptos">
                                     <field name="sequence" widget="handle"/>
                                     <field name="line_type" invisible="1"/>
@@ -276,8 +276,8 @@
                                     <field name="tax_ids" widget="many2many_tags"/>
                                 </list>
                             </field>
-                        </page>
-                    </notebook>
+                        </group>
+                    </group>
                 </sheet>
             </form>
         </field>
