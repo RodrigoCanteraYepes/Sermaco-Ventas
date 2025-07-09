@@ -210,6 +210,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="description" placeholder="Descripción de la plantilla..."/>
                             <field name="active"/>
                         </group>
                         <group>
@@ -217,16 +218,16 @@
                         </group>
                     </group>
                     <field name="template_line_ids">
-                        <list editable="bottom" string="Líneas de la Plantilla">
+                        <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
                             <field name="sequence" widget="handle"/>
                             <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
-                            <field name="product_id"/>
-                            <field name="name"/>
-                            <field name="product_uom_qty"/>
-                            <field name="product_uom"/>
-                            <field name="price_unit" widget="monetary"/>
-                            <field name="tax_ids" widget="many2many_tags"/>
+                            <field name="product_id" column_invisible="is_fixed"/>
+                            <field name="name" decoration-bf="is_fixed"/>
+                            <field name="product_uom_qty" column_invisible="is_fixed"/>
+                            <field name="product_uom" column_invisible="is_fixed"/>
+                            <field name="price_unit" widget="monetary" column_invisible="is_fixed"/>
+                            <field name="tax_ids" widget="many2many_tags" column_invisible="is_fixed"/>
                         </list>
                     </field>
                 </sheet>

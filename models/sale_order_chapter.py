@@ -446,7 +446,8 @@ class SaleOrderChapterTemplate(models.Model):
     )
     
     description = fields.Text(
-        string='Descripción'
+        string='Descripción',
+        help='Descripción detallada de la plantilla'
     )
     
     # Campo chapter_type eliminado - ahora se usa line_type en cada línea
@@ -484,10 +485,10 @@ class SaleOrderChapterTemplate(models.Model):
         
         # Crear líneas fijas para cada sección siempre
         sections = [
-            {'line_type': 'alquiler', 'sequence': 10, 'name': 'Alquiler'},
-            {'line_type': 'montaje', 'sequence': 20, 'name': 'Montaje'},
-            {'line_type': 'portes', 'sequence': 30, 'name': 'Portes'},
-            {'line_type': 'otros', 'sequence': 40, 'name': 'Otros Conceptos'},
+            {'line_type': 'alquiler', 'sequence': 100, 'name': 'Alquiler'},
+            {'line_type': 'montaje', 'sequence': 200, 'name': 'Montaje'},
+            {'line_type': 'portes', 'sequence': 300, 'name': 'Portes'},
+            {'line_type': 'otros', 'sequence': 400, 'name': 'Otros Conceptos'},
         ]
         
         for section in sections:
@@ -666,10 +667,35 @@ class SaleOrderChapterTemplateLine(models.Model):
     
     @api.model
     def create(self, vals):
-        """Asegurar que el line_type se establece correctamente según la sección"""
+        """Asegurar que el line_type se establece correctamente y la secuencia se ordena por tipo"""
         # Si se está creando desde una sección específica, establecer el line_type correcto
         if self.env.context.get('default_line_type'):
             vals['line_type'] = self.env.context.get('default_line_type')
+        
+        # Si no es una línea fija, calcular la secuencia para que aparezca después de la línea fija de su tipo
+        if not vals.get('is_fixed', False) and vals.get('template_id') and vals.get('line_type'):
+            template_id = vals['template_id']
+            line_type = vals['line_type']
+            
+            # Buscar la secuencia base para este tipo de línea
+            base_sequences = {
+                'alquiler': 100,
+                'montaje': 200,
+                'portes': 300,
+                'otros': 400,
+            }
+            
+            # Encontrar la última secuencia para este tipo de línea
+            existing_lines = self.search([
+                ('template_id', '=', template_id),
+                ('line_type', '=', line_type)
+            ], order='sequence desc', limit=1)
+            
+            if existing_lines:
+                vals['sequence'] = existing_lines.sequence + 1
+            else:
+                vals['sequence'] = base_sequences.get(line_type, 400) + 1
+        
         return super().create(vals)
     
     @api.onchange('product_id')
