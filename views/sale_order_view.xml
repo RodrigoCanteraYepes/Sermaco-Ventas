@@ -64,11 +64,12 @@
                             </div>
                             <div class="col-6">
                                 <group string="Acciones">
-                                    <button name="action_apply_multiple_templates" 
-                                            string="Aplicar Plantillas" 
+                                    <button name="action_load_template" 
+                                            string="Cargar Plantilla" 
                                             type="object" 
-                                            class="btn-info me-2"
-                                            icon="fa-magic"
+                                            class="btn-success me-2"
+                                            icon="fa-download"
+                                            help="Seleccionar y cargar una plantilla de capítulo"
                                             groups="sales_team.group_sale_salesman"/>
                                     <button name="action_transfer_all_chapters_to_lines" 
                                             string="Transferir Todo a Líneas del Pedido" 
@@ -183,13 +184,15 @@
         <field name="arch" type="xml">
             <list string="Plantillas de Capítulos">
                 <field name="name"/>
+                <field name="description"/>
                 <field name="user_id"/>
                 <field name="active"/>
                 <button name="action_apply_template" 
-                        string="Aplicar" 
+                        string="Cargar" 
                         type="object" 
-                        icon="fa-plus" 
-                        class="btn-sm btn-success"/>
+                        icon="fa-download" 
+                        class="btn-sm btn-success"
+                        help="Cargar esta plantilla en el presupuesto"/>
             </list>
         </field>
     </record>
@@ -200,11 +203,12 @@
         <field name="arch" type="xml">
             <form string="Plantilla de Capítulo">
                 <header>
-                    <button name="action_apply_template" 
-                            string="Aplicar Plantilla" 
+                    <button name="action_reload_template_view" 
+                            string="Actualizar Vista" 
                             type="object" 
-                            class="btn-primary"
-                            groups="sales_team.group_sale_salesman"/>
+                            class="btn-info"
+                            icon="fa-refresh"
+                            help="Actualiza y recarga la vista para ver los cambios"/>
                 </header>
                 <sheet>
                     <group>

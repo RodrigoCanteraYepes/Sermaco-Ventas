@@ -503,94 +503,59 @@ class SaleOrderChapterTemplate(models.Model):
             })
     
     def action_apply_template(self):
-        """Aplica la plantilla creando capítulos según las líneas marcadas como fijas"""
+        """Aplica la plantilla creando un capítulo con todas las líneas"""
         self.ensure_one()
         
-        sale_order_id = self.env.context.get('active_id')
+        # Obtener el ID del presupuesto desde el contexto
+        sale_order_id = self.env.context.get('default_sale_order_id') or self.env.context.get('active_id')
         if not sale_order_id:
             raise ValidationError(_('No se puede determinar el presupuesto de venta.'))
         
-        # Filtrar solo las líneas marcadas como fijas
-        fixed_lines = self.template_line_ids.filtered('is_fixed')
-        
-        if not fixed_lines:
-            raise ValidationError(_('No hay líneas fijas marcadas para crear capítulos.'))
-        
-        created_chapters = []
-        
-        # Agrupar líneas por tipo de sección
-        sections_dict = {}
-        for line in fixed_lines:
-            if line.line_type not in sections_dict:
-                sections_dict[line.line_type] = []
-            sections_dict[line.line_type].append(line)
-        
-        # Crear capítulos para cada sección que tenga líneas fijas
-        section_names = {
-            'alquiler': f'ALQUILER {self.name}',
-            'montaje': f'MONTAJE {self.name}',
-            'portes': f'PORTES {self.name}',
-            'otros': f'OTROS CONCEPTOS {self.name}',
+        # Crear un capítulo con el nombre de la plantilla
+        chapter_vals = {
+            'name': self.name,
+            'description': self.description or '',
+            'order_id': sale_order_id,
+            'chapter_type': 'mixto',
         }
         
-        for section_type, section_lines in sections_dict.items():
-            # Crear el capítulo
-            chapter_vals = {
-                'name': section_names.get(section_type, f'{section_type.upper()} {self.name}'),
-                'order_id': sale_order_id,
-                'chapter_type': section_type,
-            }
-            
-            chapter = self.env['sale.order.chapter'].create(chapter_vals)
-            created_chapters.append(chapter.id)
-            
-            # Crear las líneas del capítulo
-            for template_line in section_lines:
-                line_vals = {
-                    'chapter_id': chapter.id,
-                    'sequence': template_line.sequence,
-                    'line_type': template_line.line_type,
-                    'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.name,
-                    'product_uom_qty': template_line.product_uom_qty,
-                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                    'price_unit': template_line.price_unit,
-                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
-                }
-                self.env['sale.order.chapter.line'].create(line_vals)
-            
-            # Crear también capítulo de desmontaje para montaje
-            if section_type == 'montaje':
-                desmontaje_vals = {
-                    'name': f'DESMONTAJE {self.name}',
-                    'order_id': sale_order_id,
-                    'chapter_type': 'montaje',
-                }
-                desmontaje_chapter = self.env['sale.order.chapter'].create(desmontaje_vals)
-                created_chapters.append(desmontaje_chapter.id)
-                
-                # Crear las mismas líneas para desmontaje
-                for template_line in section_lines:
-                    line_vals = {
-                        'chapter_id': desmontaje_chapter.id,
-                        'sequence': template_line.sequence,
-                        'line_type': template_line.line_type,
-                        'product_id': template_line.product_id.id if template_line.product_id else False,
-                        'name': template_line.name,
-                        'product_uom_qty': template_line.product_uom_qty,
-                        'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                        'price_unit': template_line.price_unit,
-                        'tax_ids': [(6, 0, template_line.tax_ids.ids)],
-                    }
-                    self.env['sale.order.chapter.line'].create(line_vals)
+        chapter = self.env['sale.order.chapter'].create(chapter_vals)
         
+        # Crear todas las líneas de la plantilla en el capítulo
+        for template_line in self.template_line_ids:
+            line_vals = {
+                'chapter_id': chapter.id,
+                'sequence': template_line.sequence,
+                'line_type': template_line.line_type,
+                'product_id': template_line.product_id.id if template_line.product_id else False,
+                'name': template_line.name,
+                'product_uom_qty': template_line.product_uom_qty,
+                'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                'price_unit': template_line.price_unit,
+                'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+            }
+            self.env['sale.order.chapter.line'].create(line_vals)
+        
+        # Mostrar mensaje de éxito y cerrar la ventana
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Presupuesto de Venta'),
-            'res_model': 'sale.order',
-            'res_id': sale_order_id,
-            'view_mode': 'form',
-            'target': 'current',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Plantilla Cargada'),
+                'message': _('La plantilla "%s" se ha cargado correctamente como un nuevo capítulo.') % self.name,
+                'type': 'success',
+                'next': {
+                    'type': 'ir.actions.act_window_close',
+                }
+            }
+        }
+    
+    def action_reload_template_view(self):
+        """Actualiza y recarga la vista de la plantilla"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
         }
     
     def unlink(self):

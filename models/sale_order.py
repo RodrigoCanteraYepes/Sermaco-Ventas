@@ -146,13 +146,17 @@ class SaleOrder(models.Model):
     
 
     
-    def action_apply_multiple_templates(self):
-        """Abrir wizard para aplicar múltiples plantillas"""
+    def action_load_template(self):
+        """Abrir selector de plantillas para cargar en el presupuesto"""
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Aplicar Múltiples Plantillas'),
-            'res_model': 'chapter.template.wizard',
-            'view_mode': 'form',
+            'name': _('Cargar Plantilla'),
+            'res_model': 'sale.order.chapter.template',
+            'view_mode': 'list',
             'target': 'new',
-            'context': {'default_sale_order_id': self.id}
+            'context': {
+                'default_sale_order_id': self.id,
+                'search_default_active': 1,
+            },
+            'domain': [('active', '=', True)]
         }
