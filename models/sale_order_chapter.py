@@ -457,34 +457,7 @@ class SaleOrderChapterTemplate(models.Model):
         string='Líneas de la Plantilla'
     )
     
-    # Secciones fijas
-    alquiler_section_ids = fields.One2many(
-        'sale.order.chapter.template.line',
-        'template_id',
-        string='Sección Alquiler',
-        domain=[('line_type', '=', 'alquiler')]
-    )
-    
-    montaje_section_ids = fields.One2many(
-        'sale.order.chapter.template.line',
-        'template_id',
-        string='Sección Montaje',
-        domain=[('line_type', '=', 'montaje')]
-    )
-    
-    portes_section_ids = fields.One2many(
-        'sale.order.chapter.template.line',
-        'template_id',
-        string='Sección Portes',
-        domain=[('line_type', '=', 'portes')]
-    )
-    
-    otros_section_ids = fields.One2many(
-        'sale.order.chapter.template.line',
-        'template_id',
-        string='Sección Otros Conceptos',
-        domain=[('line_type', '=', 'otros')]
-    )
+
     
     active = fields.Boolean(
         string='Activo',
@@ -509,61 +482,96 @@ class SaleOrderChapterTemplate(models.Model):
         """Crea las 4 secciones fijas por defecto"""
         self.ensure_one()
         
-        # Solo crear si no existen líneas
-        if not self.template_line_ids:
-            sections = [
-                {'line_type': 'alquiler', 'sequence': 10},
-                {'line_type': 'montaje', 'sequence': 20},
-                {'line_type': 'portes', 'sequence': 30},
-                {'line_type': 'otros', 'sequence': 40},
-            ]
-            
-            for section in sections:
-                self.env['sale.order.chapter.template.line'].create({
-                    'template_id': self.id,
-                    'line_type': section['line_type'],
-                    'sequence': section['sequence'],
-                    'name': f'Línea de {section["line_type"].title()}',
-                    'product_uom_qty': 1.0,
-                    'price_unit': 0.0,
-                    'is_fixed': True,
-                })
+        # Crear líneas fijas para cada sección siempre
+        sections = [
+            {'line_type': 'alquiler', 'sequence': 10, 'name': 'Alquiler'},
+            {'line_type': 'montaje', 'sequence': 20, 'name': 'Montaje'},
+            {'line_type': 'portes', 'sequence': 30, 'name': 'Portes'},
+            {'line_type': 'otros', 'sequence': 40, 'name': 'Otros Conceptos'},
+        ]
+        
+        for section in sections:
+            self.env['sale.order.chapter.template.line'].create({
+                'template_id': self.id,
+                'line_type': section['line_type'],
+                'sequence': section['sequence'],
+                'name': section['name'],
+                'product_uom_qty': 1.0,
+                'price_unit': 0.0,
+                'is_fixed': True,
+            })
     
     def action_apply_template(self):
-        """Aplica la plantilla creando múltiples capítulos según las secciones"""
+        """Aplica la plantilla creando capítulos según las líneas marcadas como fijas"""
         self.ensure_one()
         
         sale_order_id = self.env.context.get('active_id')
         if not sale_order_id:
             raise ValidationError(_('No se puede determinar el presupuesto de venta.'))
         
+        # Filtrar solo las líneas marcadas como fijas
+        fixed_lines = self.template_line_ids.filtered('is_fixed')
+        
+        if not fixed_lines:
+            raise ValidationError(_('No hay líneas fijas marcadas para crear capítulos.'))
+        
         created_chapters = []
         
-        # Crear capítulos para cada sección que tenga líneas
-        sections_to_create = [
-            ('alquiler', f'ALQUILER {self.name}', self.alquiler_section_ids),
-            ('montaje', f'MONTAJE {self.name}', self.montaje_section_ids),
-            ('montaje', f'DESMONTAJE {self.name}', self.montaje_section_ids),  # Crear también desmontaje
-            ('portes', f'PORTES {self.name}', self.portes_section_ids),
-            ('otros', f'OTROS CONCEPTOS {self.name}', self.otros_section_ids),
-        ]
+        # Agrupar líneas por tipo de sección
+        sections_dict = {}
+        for line in fixed_lines:
+            if line.line_type not in sections_dict:
+                sections_dict[line.line_type] = []
+            sections_dict[line.line_type].append(line)
         
-        for section_type, chapter_name, section_lines in sections_to_create:
-            if section_lines:
-                # Crear el capítulo
-                chapter_vals = {
-                    'name': chapter_name,
-                    'order_id': sale_order_id,
-                    'chapter_type': section_type,
+        # Crear capítulos para cada sección que tenga líneas fijas
+        section_names = {
+            'alquiler': f'ALQUILER {self.name}',
+            'montaje': f'MONTAJE {self.name}',
+            'portes': f'PORTES {self.name}',
+            'otros': f'OTROS CONCEPTOS {self.name}',
+        }
+        
+        for section_type, section_lines in sections_dict.items():
+            # Crear el capítulo
+            chapter_vals = {
+                'name': section_names.get(section_type, f'{section_type.upper()} {self.name}'),
+                'order_id': sale_order_id,
+                'chapter_type': section_type,
+            }
+            
+            chapter = self.env['sale.order.chapter'].create(chapter_vals)
+            created_chapters.append(chapter.id)
+            
+            # Crear las líneas del capítulo
+            for template_line in section_lines:
+                line_vals = {
+                    'chapter_id': chapter.id,
+                    'sequence': template_line.sequence,
+                    'line_type': template_line.line_type,
+                    'product_id': template_line.product_id.id if template_line.product_id else False,
+                    'name': template_line.name,
+                    'product_uom_qty': template_line.product_uom_qty,
+                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                    'price_unit': template_line.price_unit,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
+                self.env['sale.order.chapter.line'].create(line_vals)
+            
+            # Crear también capítulo de desmontaje para montaje
+            if section_type == 'montaje':
+                desmontaje_vals = {
+                    'name': f'DESMONTAJE {self.name}',
+                    'order_id': sale_order_id,
+                    'chapter_type': 'montaje',
+                }
+                desmontaje_chapter = self.env['sale.order.chapter'].create(desmontaje_vals)
+                created_chapters.append(desmontaje_chapter.id)
                 
-                chapter = self.env['sale.order.chapter'].create(chapter_vals)
-                created_chapters.append(chapter.id)
-                
-                # Crear las líneas del capítulo
+                # Crear las mismas líneas para desmontaje
                 for template_line in section_lines:
                     line_vals = {
-                        'chapter_id': chapter.id,
+                        'chapter_id': desmontaje_chapter.id,
                         'sequence': template_line.sequence,
                         'line_type': template_line.line_type,
                         'product_id': template_line.product_id.id if template_line.product_id else False,
@@ -575,17 +583,14 @@ class SaleOrderChapterTemplate(models.Model):
                     }
                     self.env['sale.order.chapter.line'].create(line_vals)
         
-        if created_chapters:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Presupuesto de Venta'),
-                'res_model': 'sale.order',
-                'res_id': sale_order_id,
-                'view_mode': 'form',
-                'target': 'current',
-            }
-        else:
-            raise ValidationError(_('No se encontraron líneas en las secciones para crear capítulos.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Presupuesto de Venta'),
+            'res_model': 'sale.order',
+            'res_id': sale_order_id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
     
     def unlink(self):
         """Control de permisos para eliminar plantillas"""

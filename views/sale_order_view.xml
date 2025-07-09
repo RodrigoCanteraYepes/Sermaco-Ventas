@@ -216,68 +216,19 @@
                             <field name="user_id"/>
                         </group>
                     </group>
-                    <group>
-                        <group string="Alquiler">
-                            <field name="alquiler_section_ids" context="{'default_line_type': 'alquiler'}" nolabel="1">
-                                <list editable="bottom" string="Líneas de Alquiler">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed"/>
-                                    <field name="product_id"/>
-                                    <field name="name"/>
-                                    <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary"/>
-                                    <field name="tax_ids" widget="many2many_tags"/>
-                                </list>
-                            </field>
-                        </group>
-                        <group string="Montaje">
-                            <field name="montaje_section_ids" context="{'default_line_type': 'montaje'}" nolabel="1">
-                                <list editable="bottom" string="Líneas de Montaje">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed"/>
-                                    <field name="product_id"/>
-                                    <field name="name"/>
-                                    <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary"/>
-                                    <field name="tax_ids" widget="many2many_tags"/>
-                                </list>
-                            </field>
-                        </group>
-                        <group string="Portes">
-                            <field name="portes_section_ids" context="{'default_line_type': 'portes'}" nolabel="1">
-                                <list editable="bottom" string="Líneas de Portes">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed"/>
-                                    <field name="product_id"/>
-                                    <field name="name"/>
-                                    <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary"/>
-                                    <field name="tax_ids" widget="many2many_tags"/>
-                                </list>
-                            </field>
-                        </group>
-                        <group string="Otros Conceptos">
-                            <field name="otros_section_ids" context="{'default_line_type': 'otros'}" nolabel="1">
-                                <list editable="bottom" string="Líneas de Otros Conceptos">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed"/>
-                                    <field name="product_id"/>
-                                    <field name="name"/>
-                                    <field name="product_uom_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="price_unit" widget="monetary"/>
-                                    <field name="tax_ids" widget="many2many_tags"/>
-                                </list>
-                            </field>
-                        </group>
-                    </group>
+                    <field name="template_line_ids">
+                        <list editable="bottom" string="Líneas de la Plantilla">
+                            <field name="sequence" widget="handle"/>
+                            <field name="line_type" string="Tipo de Sección"/>
+                            <field name="is_fixed" string="Línea Fija"/>
+                            <field name="product_id"/>
+                            <field name="name"/>
+                            <field name="product_uom_qty"/>
+                            <field name="product_uom"/>
+                            <field name="price_unit" widget="monetary"/>
+                            <field name="tax_ids" widget="many2many_tags"/>
+                        </list>
+                    </field>
                 </sheet>
             </form>
         </field>
