@@ -128,7 +128,7 @@ class SaleOrderChapter(models.Model):
                 'product_uom': line.product_uom.id if line.product_uom else False,
                 'price_unit': line.price_unit,                'tax_ids': [(6, 0, line.tax_ids.ids)],
             }
-            self.env['sale.order.chapter.template.line'].create(template_line_vals)
+            self.env['sale.order.chapter.template.line'].with_context(creating_from_template=True).create(template_line_vals)
         
         # Forzar commit de la transacción
         self.env.cr.commit()
@@ -367,16 +367,57 @@ class SaleOrderChapterLine(models.Model):
             }
         }
     
+    @api.model
+    def create(self, vals):
+        """Control de permisos para crear líneas según tipo"""
+        # Verificar si se está intentando crear una línea de alquiler o montaje
+        line_type = vals.get('line_type')
+        
+        # Permitir creación durante la aplicación de plantillas o creación automática de capítulos
+        if self.env.context.get('creating_from_template') or self.env.context.get('creating_default_sections'):
+            return super().create(vals)
+        
+        # Evitar creación manual de líneas de alquiler y montaje
+        if line_type in ('alquiler', 'montaje'):
+            raise AccessError(_('No se pueden añadir nuevas líneas a las secciones de alquiler y montaje.'))
+        
+        return super().create(vals)
+    
     def unlink(self):
-        """Control de permisos para eliminar líneas"""
-        if not self.env.user.has_group('sales_team.group_sale_manager'):
-            raise AccessError(_('Solo los gerentes de ventas pueden eliminar líneas de capítulos.'))
+        """Control de permisos para eliminar líneas según tipo y si es fija"""
+        for line in self:
+            # Las líneas fijas de alquiler y montaje no se pueden eliminar
+            if line.is_fixed and line.line_type in ('alquiler', 'montaje'):
+                raise AccessError(_('No se pueden eliminar las líneas de sección de alquiler y montaje.'))
+            
+            # Las líneas de datos de alquiler y montaje no se pueden eliminar
+            if not line.is_fixed and line.line_type in ('alquiler', 'montaje'):
+                raise AccessError(_('No se pueden eliminar las líneas de alquiler y montaje.'))
+            
+            # Para otras líneas, solo gerentes pueden eliminar
+            if not self.env.user.has_group('sales_team.group_sale_manager'):
+                raise AccessError(_('Solo los gerentes de ventas pueden eliminar líneas de capítulos.'))
+        
         return super().unlink()
     
     def write(self, vals):
-        """Control de permisos para modificar líneas"""
-        if not self.env.user.has_group('sales_team.group_sale_salesman'):
-            raise AccessError(_('No tienes permisos para modificar líneas de capítulos.'))
+        """Control de permisos para modificar líneas según tipo y si es fija"""
+        for line in self:
+            # Las líneas fijas de alquiler y montaje no se pueden modificar (excepto en creación)
+            if line.is_fixed and line.line_type in ('alquiler', 'montaje'):
+                raise AccessError(_('No se pueden modificar las líneas de sección de alquiler y montaje.'))
+            
+            # Para líneas de datos de alquiler y montaje, solo se puede modificar el precio
+            if not line.is_fixed and line.line_type in ('alquiler', 'montaje'):
+                # Verificar qué campos se están intentando modificar
+                forbidden_fields = set(vals.keys()) - {'price_unit'}
+                if forbidden_fields:
+                    raise AccessError(_('En las líneas de alquiler y montaje solo se puede modificar el precio unitario.'))
+            
+            # Para otras líneas, verificar permisos normales
+            elif not self.env.user.has_group('sales_team.group_sale_salesman'):
+                raise AccessError(_('No tienes permisos para modificar líneas de capítulos.'))
+        
         return super().write(vals)
 
 
@@ -427,7 +468,7 @@ class ChapterTemplateWizard(models.TransientModel):
                     'price_unit': template_line.price_unit,
                     'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
-                self.env['sale.order.chapter.line'].create(line_vals)
+                self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create(line_vals)
         
         return {
             'type': 'ir.actions.act_window',
@@ -498,7 +539,7 @@ class SaleOrderChapterTemplate(models.Model):
         ]
         
         for section in sections:
-            self.env['sale.order.chapter.template.line'].create({
+            self.env['sale.order.chapter.template.line'].with_context(creating_default_sections=True).create({
                 'template_id': self.id,
                 'line_type': section['line_type'],
                 'sequence': section['sequence'],
@@ -538,7 +579,7 @@ class SaleOrderChapterTemplate(models.Model):
         # Crear secciones para cada tipo de línea que existe en la plantilla
         if 'alquiler' in line_types_in_template:
             # Crear línea de sección fija "Alquiler" en azul
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'alquiler',
@@ -551,7 +592,7 @@ class SaleOrderChapterTemplate(models.Model):
             section_sequence += 10
             
             # Crear línea de datos con el nombre de la plantilla
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'alquiler',
@@ -565,7 +606,7 @@ class SaleOrderChapterTemplate(models.Model):
         
         if 'montaje' in line_types_in_template:
             # Crear línea de sección fija "Montaje" en azul
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'montaje',
@@ -578,7 +619,7 @@ class SaleOrderChapterTemplate(models.Model):
             section_sequence += 10
             
             # Crear línea de montaje con el nombre de la plantilla
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'montaje',
@@ -591,7 +632,7 @@ class SaleOrderChapterTemplate(models.Model):
             section_sequence += 10
             
             # Crear línea de desmontaje con el nombre de la plantilla
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'montaje',
@@ -605,7 +646,7 @@ class SaleOrderChapterTemplate(models.Model):
         
         if 'otros' in line_types_in_template:
             # Crear línea de sección fija "Otros Conceptos" en azul
-            self.env['sale.order.chapter.line'].create({
+            self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create({
                 'chapter_id': chapter.id,
                 'sequence': section_sequence,
                 'line_type': 'otros',
@@ -632,7 +673,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'price_unit': template_line.price_unit,
                     'tax_ids': [(6, 0, template_line.tax_ids.ids)],
                 }
-                self.env['sale.order.chapter.line'].create(line_vals)
+                self.env['sale.order.chapter.line'].with_context(creating_from_template=True).create(line_vals)
                 section_sequence += 10
         
         # Mostrar mensaje de éxito y cerrar la ventana

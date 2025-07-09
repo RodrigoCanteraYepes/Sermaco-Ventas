@@ -88,25 +88,8 @@
                                 <field name="name" string="Nombre de Producto"/>
                                 <field name="description" string="Descripción"/>
                                 <field name="chapter_type" string="Tipo"/>
-                                <field name="is_collapsed" invisible="1"/>
                                 <field name="total_amount" widget="monetary" sum="Total"/>
                                 <field name="currency_id" invisible="1"/>
-                                <button name="action_toggle_collapse" 
-                                        string="Minimizar" 
-                                        type="object" 
-                                        icon="fa-minus" 
-                                        class="btn-sm btn-secondary"
-                                        invisible="is_collapsed"
-                                        help="Oculta las líneas del capítulo para una vista más compacta"/>
-                                <button name="action_toggle_collapse" 
-                                        string="Expandir" 
-                                        type="object" 
-                                        icon="fa-plus" 
-                                        class="btn-sm btn-secondary"
-                                        invisible="not is_collapsed"
-                                        help="Muestra las líneas del capítulo"/>
-
-
                             </list>
                             <form string="Capítulo">
                                 <sheet>
@@ -116,7 +99,6 @@
                                             <field name="description"/>
                                             <field name="chapter_type"/>
                                             <field name="sequence"/>
-                                            <field name="is_collapsed"/>
                                         </group>
                                         <group>
                                             <field name="page_break_before"/>
@@ -128,7 +110,7 @@
                                     </group>
                                     
                                     <notebook>
-                                        <page string="Líneas del Capítulo" invisible="is_collapsed">
+                                        <page string="Líneas del Capítulo">
                                             <field name="chapter_line_ids">
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
