@@ -133,6 +133,7 @@
                                                 <list editable="bottom" default_group_by="line_type">
                                                     <field name="sequence" widget="handle"/>
                                                     <field name="line_type"/>
+                                                    <field name="is_fixed" invisible="1"/>
                                                     <field name="is_fixed" string="Línea Fija"/>
                                                     <field name="product_id" column_invisible="is_fixed"/>
                                                     <field name="name" decoration-bf="is_fixed"/>
@@ -227,6 +228,7 @@
                         <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
                             <field name="sequence" widget="handle"/>
                             <field name="line_type" string="Tipo de Sección"/>
+                            <field name="is_fixed" invisible="1"/>
                             <field name="is_fixed" string="Línea Fija"/>
                             <field name="product_id" column_invisible="is_fixed"/>
                             <field name="name" decoration-bf="is_fixed"/>
