@@ -572,21 +572,23 @@ class SaleOrderChapterTemplate(models.Model):
         """Carga la plantilla directamente como líneas del pedido"""
         lines_created = 0
         
-        # Crear líneas directamente en sale.order.line (incluyendo las fijas)
+        # Crear líneas directamente en sale.order.line (EXCLUYENDO las fijas/secciones)
         for template_line in self.template_line_ids:
-            line_vals = {
-                'order_id': sale_order.id,
-                'product_id': template_line.product_id.id if template_line.product_id else False,
-                'name': template_line.name,  # Sin prefijo para evitar texto adicional
-                'product_uom_qty': template_line.product_uom_qty,
-                'product_uom': template_line.product_uom.id if template_line.product_uom else False,
-                'price_unit': template_line.price_unit,
-                'line_type': template_line.line_type,
-                'is_fixed': template_line.is_fixed,  # Marcar si la línea es fija
-                'tax_id': [(6, 0, template_line.tax_ids.ids)],
-            }
-            self.env['sale.order.line'].with_context(creating_from_template=True).create(line_vals)
-            lines_created += 1
+            # Solo crear líneas que NO sean fijas (evitar secciones como "Alquiler", "Montaje", etc.)
+            if not template_line.is_fixed:
+                line_vals = {
+                    'order_id': sale_order.id,
+                    'product_id': template_line.product_id.id if template_line.product_id else False,
+                    'name': template_line.name,  # Sin prefijo para evitar texto adicional
+                    'product_uom_qty': template_line.product_uom_qty,
+                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                    'price_unit': template_line.price_unit,
+                    'line_type': template_line.line_type,
+                    'is_fixed': template_line.is_fixed,  # Marcar si la línea es fija
+                    'tax_id': [(6, 0, template_line.tax_ids.ids)],
+                }
+                self.env['sale.order.line'].with_context(creating_from_template=True).create(line_vals)
+                lines_created += 1
         
         # Mostrar mensaje de éxito y cerrar la ventana
         return {
