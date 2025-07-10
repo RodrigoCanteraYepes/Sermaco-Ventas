@@ -606,10 +606,16 @@ class SaleOrderChapterTemplate(models.Model):
                     'is_fixed': template_line.is_fixed,
                 }
             else:
+                # Construir el nombre incluyendo el nombre de la plantilla
+                if template_line.product_id:
+                    line_name = f"{template_line.product_id.display_name} - {self.name}"
+                else:
+                    line_name = f"{template_line.name} - {self.name}" if template_line.name else f"{template_line.line_type.title()} - {self.name}"
+                
                 line_vals = {
                     'order_id': sale_order.id,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.product_id.display_name if template_line.product_id else template_line.name,
+                    'name': line_name,
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
