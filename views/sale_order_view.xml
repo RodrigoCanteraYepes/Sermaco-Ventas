@@ -55,12 +55,12 @@
             <xpath expr="//page[@name='order_lines']//field[@name='order_line']" position="before">
                 <div class="row mb-2">
                     <div class="col-12">
-                        <button name="action_load_template" 
+                        <button name="action_load_template_to_order_lines" 
                                 string="Cargar Plantilla" 
                                 type="object" 
                                 class="btn-success me-2"
                                 icon="fa-download"
-                                help="Seleccionar y cargar una plantilla de capítulo directamente en las líneas del pedido"
+                                help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
                                 groups="sales_team.group_sale_salesman"/>
                     </div>
                 </div>

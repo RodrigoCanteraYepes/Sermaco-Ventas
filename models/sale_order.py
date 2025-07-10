@@ -153,6 +153,9 @@ class SaleOrder(models.Model):
     
     def action_load_template(self):
         """Abrir selector de plantillas para cargar en el presupuesto"""
+        # Detectar si se llama desde líneas del pedido basándose en el contexto
+        load_to_order_lines = self.env.context.get('load_to_order_lines', False)
+        
         return {
             'type': 'ir.actions.act_window',
             'name': _('Cargar Plantilla'),
@@ -162,6 +165,23 @@ class SaleOrder(models.Model):
             'context': {
                 'default_sale_order_id': self.id,
                 'search_default_active': 1,
+                'load_to_order_lines': load_to_order_lines,
+            },
+            'domain': [('active', '=', True)]
+        }
+    
+    def action_load_template_to_order_lines(self):
+        """Abrir selector de plantillas para cargar directamente en líneas del pedido"""
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Cargar Plantilla en Líneas del Pedido'),
+            'res_model': 'sale.order.chapter.template',
+            'view_mode': 'list',
+            'target': 'new',
+            'context': {
+                'default_sale_order_id': self.id,
+                'search_default_active': 1,
+                'load_to_order_lines': True,
             },
             'domain': [('active', '=', True)]
         }

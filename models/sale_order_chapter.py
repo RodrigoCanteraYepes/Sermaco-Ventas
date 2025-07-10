@@ -550,7 +550,7 @@ class SaleOrderChapterTemplate(models.Model):
             })
     
     def action_apply_template(self):
-        """Aplica la plantilla creando un capítulo con todas las líneas"""
+        """Aplica la plantilla creando un capítulo con todas las líneas o cargando directamente en líneas del pedido"""
         self.ensure_one()
         
         # Obtener el ID del presupuesto desde el contexto
@@ -558,11 +558,57 @@ class SaleOrderChapterTemplate(models.Model):
         if not sale_order_id:
             raise ValidationError(_('No se puede determinar el presupuesto de venta.'))
         
+        sale_order = self.env['sale.order'].browse(sale_order_id)
+        
+        # Verificar si debe cargar directamente en líneas del pedido
+        load_to_order_lines = self.env.context.get('load_to_order_lines', False)
+        
+        if load_to_order_lines:
+            return self._load_template_to_order_lines(sale_order)
+        else:
+            return self._load_template_to_chapter(sale_order)
+    
+    def _load_template_to_order_lines(self, sale_order):
+        """Carga la plantilla directamente como líneas del pedido"""
+        lines_created = 0
+        
+        # Crear líneas directamente en sale.order.line
+        for template_line in self.template_line_ids:
+            if not template_line.is_fixed:  # Solo crear líneas que no son fijas
+                line_vals = {
+                    'order_id': sale_order.id,
+                    'product_id': template_line.product_id.id if template_line.product_id else False,
+                    'name': f"[{self.name}] {template_line.name}",
+                    'product_uom_qty': template_line.product_uom_qty,
+                    'product_uom': template_line.product_uom.id if template_line.product_uom else False,
+                    'price_unit': template_line.price_unit,
+                    'line_type': template_line.line_type,
+                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+                }
+                self.env['sale.order.line'].create(line_vals)
+                lines_created += 1
+        
+        # Mostrar mensaje de éxito y cerrar la ventana
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Plantilla Cargada'),
+                'message': _('La plantilla "%s" se ha cargado correctamente con %d líneas en el pedido.') % (self.name, lines_created),
+                'type': 'success',
+                'next': {
+                    'type': 'ir.actions.act_window_close',
+                }
+            }
+        }
+    
+    def _load_template_to_chapter(self, sale_order):
+        """Carga la plantilla como un nuevo capítulo"""
         # Crear un capítulo con el nombre de la plantilla
         chapter_vals = {
             'name': self.name,
             'description': self.description or '',
-            'order_id': sale_order_id,
+            'order_id': sale_order.id,
             'chapter_type': 'mixto',
         }
         
