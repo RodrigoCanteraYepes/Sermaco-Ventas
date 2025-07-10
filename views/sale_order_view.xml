@@ -77,14 +77,23 @@
                 <attribute name="decoration-muted">is_fixed</attribute>
             </xpath>
             
-            <!-- Ocultar icono de eliminar para líneas fijas -->
+            <!-- Configurar vista de líneas del pedido para líneas fijas -->
             <xpath expr="//field[@name='order_line']" position="attributes">
                 <attribute name="delete">not is_fixed</attribute>
+                <attribute name="handle">not is_fixed</attribute>
             </xpath>
             
-            <!-- Ocultar handle (puntos de arrastre) para líneas fijas -->
-            <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="handle">not is_fixed</attribute>
+            <!-- Ocultar campos para líneas fijas -->
+            <xpath expr="//field[@name='order_line']//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="invisible">is_fixed</attribute>
+            </xpath>
+            
+            <xpath expr="//field[@name='order_line']//field[@name='price_unit']" position="attributes">
+                <attribute name="invisible">is_fixed</attribute>
+            </xpath>
+            
+            <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="attributes">
+                <attribute name="invisible">is_fixed</attribute>
             </xpath>
             
             <!-- Añadir la nueva pestaña después de las líneas del pedido -->
