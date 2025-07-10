@@ -153,7 +153,7 @@ class SaleOrder(models.Model):
                 sale_line_vals = {
                     'order_id': self.id,
                     'product_id': line.product_id.id if line.product_id else False,
-                    'name': f"[{chapter.name}] {name}",
+                    'name': name,  # Sin prefijo del capítulo para evitar texto adicional
                     'product_uom_qty': line.product_uom_qty,
                     'product_uom': line.product_uom.id if line.product_uom else False,
                     'price_unit': price_unit,

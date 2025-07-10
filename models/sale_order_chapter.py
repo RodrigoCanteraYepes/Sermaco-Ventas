@@ -577,7 +577,7 @@ class SaleOrderChapterTemplate(models.Model):
             line_vals = {
                 'order_id': sale_order.id,
                 'product_id': template_line.product_id.id if template_line.product_id else False,
-                'name': f"[{self.name}] {template_line.name}",
+                'name': template_line.name,  # Sin prefijo para evitar texto adicional
                 'product_uom_qty': template_line.product_uom_qty,
                 'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                 'price_unit': template_line.price_unit,
