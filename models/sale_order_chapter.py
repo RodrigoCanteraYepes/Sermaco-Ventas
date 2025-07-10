@@ -583,7 +583,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
                     'line_type': template_line.line_type,
-                    'tax_ids': [(6, 0, template_line.tax_ids.ids)],
+                    'tax_id': [(6, 0, template_line.tax_ids.ids)],
                 }
                 self.env['sale.order.line'].create(line_vals)
                 lines_created += 1
