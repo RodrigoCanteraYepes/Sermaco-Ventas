@@ -24,6 +24,31 @@ class SaleOrderLine(models.Model):
         related='source_chapter_id.name',
         readonly=True
     )
+    
+    is_fixed = fields.Boolean(
+        string='Línea Fija',
+        default=False,
+        help='Indica si esta línea es fija y no se puede modificar'
+    )
+    
+    def write(self, vals):
+        """Control de permisos para modificar líneas fijas"""
+        for line in self:
+            if line.is_fixed and not self.env.context.get('creating_from_template'):
+                # Permitir solo cambios en campos específicos para líneas fijas
+                allowed_fields = {'sequence'}
+                if any(field not in allowed_fields for field in vals.keys()):
+                    from odoo.exceptions import AccessError
+                    raise AccessError(_('Las líneas fijas no se pueden modificar. Solo se pueden editar desde las plantillas de capítulos.'))
+        return super().write(vals)
+    
+    def unlink(self):
+        """Control de permisos para eliminar líneas fijas"""
+        for line in self:
+            if line.is_fixed:
+                from odoo.exceptions import AccessError
+                raise AccessError(_('Las líneas fijas no se pueden eliminar. Solo se pueden editar desde las plantillas de capítulos.'))
+        return super().unlink()
 
 
 class SaleOrder(models.Model):
