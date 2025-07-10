@@ -220,10 +220,7 @@ class SaleOrderChapterLine(models.Model):
         domain=[('sale_ok', '=', True)]
     )
     
-    name = fields.Text(
-        string='Descripción',
-        required=True
-    )
+    # Campo name eliminado - no queremos descripción en las líneas de plantilla
     
     product_uom_qty = fields.Float(
         string='Cantidad',
@@ -579,7 +576,7 @@ class SaleOrderChapterTemplate(models.Model):
                 line_vals = {
                     'order_id': sale_order.id,
                     'product_id': False,
-                    'name': template_line.name,
+                    'name': template_line.line_type.title(),  # Usar el tipo de línea como nombre
                     'product_uom_qty': 0.0,  # Sin cantidad para secciones
                     'product_uom': False,
                     'price_unit': 0.0,  # Sin precio para secciones
@@ -591,7 +588,7 @@ class SaleOrderChapterTemplate(models.Model):
                 line_vals = {
                     'order_id': sale_order.id,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.name,
+                    'name': template_line.product_id.display_name if template_line.product_id else template_line.line_type.title(),
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
@@ -727,7 +724,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'line_type': template_line.line_type,
                     'is_fixed': template_line.is_fixed,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.name,
+                    'name': template_line.product_id.display_name if template_line.product_id else template_line.line_type.title(),
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
@@ -866,7 +863,7 @@ class SaleOrderChapterTemplateLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
-            self.name = self.product_id.display_name
+            # Campo name eliminado - solo actualizamos precio, unidad y impuestos
             self.price_unit = self.product_id.list_price
             self.product_uom = self.product_id.uom_id
             self.tax_ids = self.product_id.taxes_id

@@ -168,7 +168,7 @@
                                                     <field name="line_type"/>
                                                     <field name="is_fixed" string="Línea Fija"/>
                                                     <field name="product_id" invisible="is_fixed"/>
-                                                    <field name="name" decoration-bf="is_fixed"/>
+                                                    <!-- Campo name eliminado - no queremos descripción en plantillas -->
                                                     <field name="product_uom_qty" invisible="is_fixed"/>
                                                     <field name="product_uom" invisible="is_fixed"/>
                                                     <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler' or is_fixed"/>
