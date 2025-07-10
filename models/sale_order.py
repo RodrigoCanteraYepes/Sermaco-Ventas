@@ -150,16 +150,31 @@ class SaleOrder(models.Model):
                     name = f"{line.name} - {line.rental_periods} {period_text} x {line.price_per_period}€"
                 
                 # Crear línea en sale.order.line
-                sale_line_vals = {
-                    'order_id': self.id,
-                    'product_id': line.product_id.id if line.product_id else False,
-                    'name': name,  # Sin prefijo del capítulo para evitar texto adicional
-                    'product_uom_qty': line.product_uom_qty,
-                    'product_uom': line.product_uom.id if line.product_uom else False,
-                    'price_unit': price_unit,
-                    'line_type': line.line_type,
-                    'source_chapter_id': chapter.id,
-                }
+                if line.is_fixed:
+                    # Para líneas fijas (secciones), crear como sección
+                    sale_line_vals = {
+                        'order_id': self.id,
+                        'display_type': 'line_section',
+                        'name': name,
+                        'product_uom_qty': 0.0,
+                        'price_unit': 0.0,
+                        'line_type': line.line_type,
+                        'source_chapter_id': chapter.id,
+                        'is_fixed': line.is_fixed,
+                    }
+                else:
+                    # Para líneas normales
+                    sale_line_vals = {
+                        'order_id': self.id,
+                        'product_id': line.product_id.id if line.product_id else False,
+                        'name': name,
+                        'product_uom_qty': line.product_uom_qty,
+                        'product_uom': line.product_uom.id if line.product_uom else False,
+                        'price_unit': price_unit,
+                        'line_type': line.line_type,
+                        'source_chapter_id': chapter.id,
+                        'is_fixed': line.is_fixed,
+                    }
                 
                 self.env['sale.order.line'].create(sale_line_vals)
                 transferred_lines += 1

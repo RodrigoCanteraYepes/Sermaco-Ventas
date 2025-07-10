@@ -340,17 +340,32 @@ class SaleOrderChapterLine(models.Model):
             price_unit = self.rental_periods * self.price_per_period
         
         # Crear línea en sale.order.line
-        sale_line_vals = {
-            'order_id': sale_order.id,
-            'product_id': self.product_id.id if self.product_id else False,
-            'name': name,
-            'product_uom_qty': self.product_uom_qty,
-            'product_uom': self.product_uom.id if self.product_uom else False,
-            'price_unit': price_unit,
-            'tax_id': [(6, 0, self.tax_ids.ids)],
-            'line_type': self.line_type,
-            'source_chapter_id': self.chapter_id.id,
-        }
+        if self.is_fixed:
+            # Para líneas fijas (secciones), crear como sección
+            sale_line_vals = {
+                'order_id': sale_order.id,
+                'display_type': 'line_section',
+                'name': name,
+                'product_uom_qty': 0.0,
+                'price_unit': 0.0,
+                'line_type': self.line_type,
+                'source_chapter_id': self.chapter_id.id,
+                'is_fixed': self.is_fixed,
+            }
+        else:
+            # Para líneas normales
+            sale_line_vals = {
+                'order_id': sale_order.id,
+                'product_id': self.product_id.id if self.product_id else False,
+                'name': name,
+                'product_uom_qty': self.product_uom_qty,
+                'product_uom': self.product_uom.id if self.product_uom else False,
+                'price_unit': price_unit,
+                'tax_id': [(6, 0, self.tax_ids.ids)],
+                'line_type': self.line_type,
+                'source_chapter_id': self.chapter_id.id,
+                'is_fixed': self.is_fixed,
+            }
         
         self.env['sale.order.line'].create(sale_line_vals)
         
@@ -571,24 +586,22 @@ class SaleOrderChapterTemplate(models.Model):
         
         # Crear líneas directamente en sale.order.line (incluyendo las secciones como separadores)
         for template_line in self.template_line_ids:
-            # Para líneas fijas (secciones), no mostrar cantidad ni precio
+            # Para líneas fijas (secciones), crear como líneas de sección
             if template_line.is_fixed:
                 line_vals = {
                     'order_id': sale_order.id,
-                    'product_id': False,
-                    'name': template_line.line_type.title(),  # Usar el tipo de línea como nombre
+                    'display_type': 'line_section',  # Crear como sección
+                    'name': template_line.name,  # Usar el nombre de la plantilla
                     'product_uom_qty': 0.0,  # Sin cantidad para secciones
-                    'product_uom': False,
                     'price_unit': 0.0,  # Sin precio para secciones
                     'line_type': template_line.line_type,
                     'is_fixed': template_line.is_fixed,
-                    'tax_id': [(6, 0, [])],  # Sin impuestos para secciones
                 }
             else:
                 line_vals = {
                     'order_id': sale_order.id,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.product_id.display_name if template_line.product_id else template_line.line_type.title(),
+                    'name': template_line.product_id.display_name if template_line.product_id else template_line.name,
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,

@@ -209,7 +209,6 @@
         </field>
     </record>
 
-    <!-- Acción eliminada - funcionalidad integrada en el tab principal -->
     
     <!-- Vistas para Plantillas de Capítulos -->
     <record id="view_chapter_template_list" model="ir.ui.view">
