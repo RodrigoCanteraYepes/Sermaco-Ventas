@@ -584,6 +584,14 @@ class SaleOrderChapterTemplate(models.Model):
         """Carga la plantilla directamente como líneas del pedido"""
         lines_created = 0
         
+        # Copiar la descripción de la plantilla al campo order_description del presupuesto
+        if self.description:
+            # Si ya hay una descripción, agregar la nueva separada por líneas
+            if sale_order.order_description:
+                sale_order.order_description += "\n\n" + self.description
+            else:
+                sale_order.order_description = self.description
+        
         # Crear líneas directamente en sale.order.line (incluyendo las secciones como separadores)
         for template_line in self.template_line_ids:
             # Para líneas fijas (secciones), crear como líneas de sección
