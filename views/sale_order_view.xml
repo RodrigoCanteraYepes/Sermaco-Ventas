@@ -77,6 +77,16 @@
                 <attribute name="decoration-muted">is_fixed</attribute>
             </xpath>
             
+            <!-- Ocultar icono de eliminar para líneas fijas -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="delete">not is_fixed</attribute>
+            </xpath>
+            
+            <!-- Ocultar handle (puntos de arrastre) para líneas fijas -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="handle">not is_fixed</attribute>
+            </xpath>
+            
             <!-- Añadir la nueva pestaña después de las líneas del pedido -->
             <xpath expr="//notebook" position="inside">
                 <page string="Capítulos del Presupuesto" name="chapters">
