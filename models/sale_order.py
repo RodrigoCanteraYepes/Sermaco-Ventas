@@ -35,11 +35,9 @@ class SaleOrderLine(models.Model):
         """Control de permisos para modificar líneas fijas"""
         for line in self:
             if line.is_fixed and not self.env.context.get('creating_from_template'):
-                # Permitir solo cambios en campos específicos para líneas fijas
-                allowed_fields = {'sequence'}
-                if any(field not in allowed_fields for field in vals.keys()):
-                    from odoo.exceptions import AccessError
-                    raise AccessError(_('Las líneas fijas no se pueden modificar. Solo se pueden editar desde las plantillas de capítulos.'))
+                # Las líneas fijas no se pueden modificar en absoluto (ni siquiera la secuencia)
+                from odoo.exceptions import AccessError
+                raise AccessError(_('Las líneas fijas no se pueden modificar, mover ni cambiar. Solo se pueden editar desde las plantillas de capítulos.'))
         return super().write(vals)
     
     def unlink(self):
