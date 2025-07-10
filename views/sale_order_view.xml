@@ -66,9 +66,10 @@
                 </div>
             </xpath>
             
-            <!-- Agregar campo is_fixed a las líneas del pedido -->
+            <!-- Agregar campos is_fixed y line_type a las líneas del pedido -->
             <xpath expr="//field[@name='order_line']//field[@name='name']" position="after">
                 <field name="is_fixed" string="Fija" readonly="1"/>
+                <field name="line_type" string="Tipo" readonly="1"/>
             </xpath>
             
             <!-- Aplicar estilos a las líneas fijas -->
@@ -83,17 +84,17 @@
                 <attribute name="handle">not is_fixed</attribute>
             </xpath>
             
-            <!-- Ocultar campos para líneas fijas -->
+            <!-- Ocultar campos para líneas fijas y ciertos tipos de línea -->
             <xpath expr="//field[@name='order_line']//field[@name='product_uom_qty']" position="attributes">
-                <attribute name="invisible">is_fixed</attribute>
+                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
             </xpath>
             
             <xpath expr="//field[@name='order_line']//field[@name='price_unit']" position="attributes">
-                <attribute name="invisible">is_fixed</attribute>
+                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
             </xpath>
             
             <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="attributes">
-                <attribute name="invisible">is_fixed</attribute>
+                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
             </xpath>
             
             <!-- Añadir la nueva pestaña después de las líneas del pedido -->
