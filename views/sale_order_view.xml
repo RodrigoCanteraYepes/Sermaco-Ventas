@@ -46,6 +46,11 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+            <!-- Agregar campo descripción debajo del cliente -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="order_description" placeholder="Descripción adicional del presupuesto..."/>
+            </xpath>
+            
             <!-- Añadir la nueva pestaña después de las líneas del pedido -->
             <xpath expr="//notebook" position="inside">
                 <page string="Capítulos del Presupuesto" name="chapters">

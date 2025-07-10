@@ -35,6 +35,11 @@ class SaleOrder(models.Model):
         string='Capítulos del Presupuesto'
     )
     
+    order_description = fields.Text(
+        string='Descripción del Presupuesto',
+        help='Descripción adicional para el presupuesto'
+    )
+    
     chapters_total = fields.Monetary(
         string='Total de Capítulos',
         compute='_compute_chapters_total',
