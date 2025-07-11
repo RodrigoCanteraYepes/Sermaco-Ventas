@@ -31,6 +31,14 @@ class SaleOrderLine(models.Model):
         help='Indica si esta línea es fija y no se puede modificar'
     )
     
+    # Redefinir product_id para permitir borrar productos
+    product_id = fields.Many2one(
+        'product.product',
+        string='Product',
+        ondelete='set null',
+        help='Producto asociado a la línea. Se puede borrar sin afectar la línea.'
+    )
+    
     def write(self, vals):
         """Control de permisos para modificar líneas fijas"""
         for line in self:

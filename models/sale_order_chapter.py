@@ -217,7 +217,8 @@ class SaleOrderChapterLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain=[('sale_ok', '=', True)]
+        domain=[('sale_ok', '=', True)],
+        ondelete='set null'
     )
     
     # Campo name eliminado - no queremos descripción en las líneas de plantilla
@@ -808,7 +809,8 @@ class SaleOrderChapterTemplateLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain=[('sale_ok', '=', True)]
+        domain=[('sale_ok', '=', True)],
+        ondelete='set null'
     )
     
     name = fields.Text(
