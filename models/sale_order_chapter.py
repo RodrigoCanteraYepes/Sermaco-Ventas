@@ -905,7 +905,8 @@ class SaleOrderChapterTemplateLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
-            # Campo name eliminado - solo actualizamos precio, unidad y impuestos
+            # Actualizar nombre, precio, unidad y impuestos
+            self.name = self.product_id.display_name
             self.price_unit = self.product_id.list_price
             self.product_uom = self.product_id.uom_id
             self.tax_ids = self.product_id.taxes_id
