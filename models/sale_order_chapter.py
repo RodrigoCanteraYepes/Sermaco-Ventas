@@ -585,6 +585,27 @@ class SaleOrderChapterTemplate(models.Model):
         """Carga la plantilla directamente como líneas del pedido"""
         lines_created = 0
         
+        # Copiar la descripción de la plantilla al campo order_description del presupuesto
+        if self.description:
+            # Si ya hay una descripción, agregar la nueva separada por líneas
+            if sale_order.order_description:
+                sale_order.order_description += "\n\n" + self.description
+            else:
+                sale_order.order_description = self.description
+        
+        # Crear una línea de sección principal con el nombre de la plantilla en grande
+        main_section_vals = {
+            'order_id': sale_order.id,
+            'display_type': 'line_section',
+            'name': f"🔹 {self.name.upper()}",  # Nombre de la plantilla en mayúsculas con icono
+            'product_uom_qty': 0.0,
+            'price_unit': 0.0,
+            'line_type': 'otros',
+            'is_fixed': True,
+        }
+        self.env['sale.order.line'].with_context(creating_from_template=True).create(main_section_vals)
+        lines_created += 1
+        
         # Crear líneas directamente en sale.order.line (incluyendo las secciones como separadores)
         for template_line in self.template_line_ids:
             # Para líneas fijas (secciones), crear como líneas de sección
@@ -592,17 +613,23 @@ class SaleOrderChapterTemplate(models.Model):
                 line_vals = {
                     'order_id': sale_order.id,
                     'display_type': 'line_section',  # Crear como sección
-                    'name': template_line.name,  # Usar el nombre de la plantilla
+                    'name': f"   ▪ {template_line.name}",  # Indentado con viñeta
                     'product_uom_qty': 0.0,  # Sin cantidad para secciones
                     'price_unit': 0.0,  # Sin precio para secciones
                     'line_type': template_line.line_type,
                     'is_fixed': template_line.is_fixed,
                 }
             else:
+                # Construir el nombre incluyendo el nombre de la plantilla
+                if template_line.product_id:
+                    line_name = f"      • {template_line.product_id.display_name}"
+                else:
+                    line_name = f"      • {template_line.name}" if template_line.name else f"      • {template_line.line_type.title()}"
+                
                 line_vals = {
                     'order_id': sale_order.id,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
-                    'name': template_line.product_id.display_name if template_line.product_id else template_line.name,
+                    'name': line_name,
                     'product_uom_qty': template_line.product_uom_qty,
                     'product_uom': template_line.product_uom.id if template_line.product_uom else False,
                     'price_unit': template_line.price_unit,
@@ -668,7 +695,7 @@ class SaleOrderChapterTemplate(models.Model):
                 'sequence': section_sequence,
                 'line_type': 'alquiler',
                 'is_fixed': False,
-                'name': f'ALQUILER {self.name.upper()}',
+                'name': f'🔹 ALQUILER {self.name.upper()}',
                 'product_uom_qty': 1.0,
                 'product_uom': self.env.ref('uom.product_uom_unit').id,
                 'price_unit': 0.0,
@@ -695,7 +722,7 @@ class SaleOrderChapterTemplate(models.Model):
                 'sequence': section_sequence,
                 'line_type': 'montaje',
                 'is_fixed': False,
-                'name': f'MONTAJE {self.name.upper()}',
+                'name': f'🔹 MONTAJE {self.name.upper()}',
                 'product_uom_qty': 1.0,
                 'product_uom': self.env.ref('uom.product_uom_unit').id,
                 'price_unit': 120.0,
@@ -708,7 +735,7 @@ class SaleOrderChapterTemplate(models.Model):
                 'sequence': section_sequence,
                 'line_type': 'montaje',
                 'is_fixed': False,
-                'name': f'DESMONTAJE {self.name.upper()}',
+                'name': f'🔹 DESMONTAJE {self.name.upper()}',
                 'product_uom_qty': 1.0,
                 'product_uom': self.env.ref('uom.product_uom_unit').id,
                 'price_unit': 120.0,

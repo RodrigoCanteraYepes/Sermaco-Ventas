@@ -73,8 +73,9 @@
             
             <!-- Aplicar estilos a las líneas fijas -->
             <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
-                <attribute name="decoration-bf">is_fixed</attribute>
-                <attribute name="decoration-muted">is_fixed</attribute>
+                <attribute name="decoration-bf">is_fixed and display_type == 'line_section'</attribute>
+                <attribute name="decoration-info">is_fixed and display_type == 'line_section'</attribute>
+                <attribute name="style">font-size: 14px; font-weight: bold; color: #0066cc;</attribute>
             </xpath>
             
             <!-- Configurar vista de líneas del pedido para líneas fijas -->
@@ -96,116 +97,7 @@
                 <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
             </xpath>
             
-            <!-- Añadir la nueva pestaña después de las líneas del pedido -->
-            <xpath expr="//notebook" position="inside">
-                <page string="Capítulos del Presupuesto" name="chapters">
-                    <div class="o_sale_order_chapters">
-                        <!-- Crear Nuevo Capítulo -->
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <group string="Crear Nuevo Capítulo">
-                                    <field name="new_chapter_name" placeholder="Nombre del Capítulo" nolabel="1"/>
-                                    <button name="action_create_chapter_inline" 
-                                            string="Crear Capítulo" 
-                                            type="object" 
-                                            class="btn-primary"
-                                            invisible="not new_chapter_name"/>
-                                </group>
-                            </div>
-                            <div class="col-6">
-                                <group string="Acciones">
-                                    <button name="action_load_template" 
-                                            string="Cargar Plantilla" 
-                                            type="object" 
-                                            class="btn-success me-2"
-                                            icon="fa-download"
-                                            help="Seleccionar y cargar una plantilla de capítulo"
-                                            groups="sales_team.group_sale_salesman"/>
-                                    <button name="action_transfer_all_chapters_to_lines" 
-                                            string="Transferir Todo a Líneas del Pedido" 
-                                            type="object" 
-                                            class="btn-warning"
-                                            icon="fa-arrow-right"
-                                            confirm="¿Está seguro de que desea transferir todas las líneas de capítulos a las líneas del pedido?"/>
-                                </group>
-                            </div>
-                        </div>
-                        
-                        <!-- Lista de capítulos -->
-                        <field name="chapter_ids" nolabel="1">
-                            <list string="Capítulos" editable="bottom">
-                                <field name="sequence" widget="handle"/>
-                                <field name="name" string="Nombre de Producto"/>
-                                <field name="description" string="Descripción"/>
-                                <field name="chapter_type" string="Tipo"/>
-                                <field name="total_amount" widget="monetary" sum="Total"/>
-                                <field name="currency_id" invisible="1"/>
-                            </list>
-                            <form string="Capítulo">
-                                <sheet>
-                                    <group>
-                                        <group>
-                                            <field name="name"/>
-                                            <field name="description"/>
-                                            <field name="chapter_type"/>
-                                            <field name="sequence"/>
-                                        </group>
-                                        <group>
-                                            <field name="page_break_before"/>
-                                            <field name="use_manual_total"/>
-                                            <field name="manual_total" widget="monetary" invisible="not use_manual_total"/>
-                                            <field name="total_amount" widget="monetary"/>
-                                            <field name="currency_id" invisible="1"/>
-                                        </group>
-                                    </group>
-                                    
-                                    <notebook>
-                                        <page string="Líneas del Capítulo">
-                                            <field name="chapter_line_ids">
-                                                <list editable="bottom" default_group_by="line_type">
-                                                    <field name="sequence" widget="handle"/>
-                                                    <field name="line_type"/>
-                                                    <field name="is_fixed" string="Línea Fija"/>
-                                                    <field name="product_id" invisible="is_fixed"/>
-                                                    <!-- Campo name eliminado - no queremos descripción en plantillas -->
-                                                    <field name="product_uom_qty" invisible="is_fixed"/>
-                                                    <field name="product_uom" invisible="is_fixed"/>
-                                                    <field name="price_unit" widget="monetary" invisible="line_type == 'alquiler' or is_fixed"/>
-                                                    <field name="rental_period_type" invisible="line_type != 'alquiler' or is_fixed"/>
-                                                     <field name="rental_periods" invisible="line_type != 'alquiler' or is_fixed"/>
-                                                     <field name="price_per_period" widget="monetary" invisible="line_type != 'alquiler' or is_fixed"/>
-                                                    <field name="tax_ids" widget="many2many_tags" invisible="is_fixed"/>
-                                                    <field name="price_subtotal" widget="monetary" sum="Total" invisible="is_fixed"/>
-                                                    <field name="currency_id" invisible="1"/>
-                                                    <button name="action_transfer_to_order_lines" 
-                                                            string="Transferir" 
-                                                            type="object" 
-                                                            icon="fa-arrow-right" 
-                                                            class="btn-sm btn-warning"
-                                                            invisible="is_fixed"/>
 
-                                                </list>
-                                            </field>
-
-                                        </page>
-                                    </notebook>
-                                </sheet>
-                            </form>
-                        </field>
-                        
-                        <!-- Resumen de totales -->
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="float-end">
-                                    <strong>Total de Capítulos: 
-                                        <field name="chapters_total" widget="monetary" nolabel="1"/>
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </page>
-            </xpath>
         </field>
     </record>
 
