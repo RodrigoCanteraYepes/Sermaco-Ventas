@@ -71,11 +71,18 @@
                 <field name="line_type" string="Tipo" readonly="1"/>
             </xpath>
             
-            <!-- Aplicar estilos a las líneas fijas -->
+            <!-- Aplicar estilos especiales para títulos principales de plantillas -->
             <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
-                <attribute name="decoration-bf">is_fixed and display_type == 'line_section'</attribute>
-                <attribute name="decoration-info">is_fixed and display_type == 'line_section'</attribute>
+                <attribute name="style">font-size: 18px; font-weight: bold; color: #0066cc; background-color: #e6f3ff; padding: 8px; border-left: 4px solid #0066cc;</attribute>
+                <attribute name="invisible">not (is_fixed and display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or ''))</attribute>
+            </xpath>
+            
+            <!-- Aplicar estilos a las subsecciones (Alquiler, Montaje, etc.) -->
+            <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
+                <attribute name="decoration-bf">is_fixed and display_type == 'line_section' and line_type != 'otros'</attribute>
+                <attribute name="decoration-info">is_fixed and display_type == 'line_section' and line_type != 'otros'</attribute>
                 <attribute name="style">font-size: 14px; font-weight: bold; color: #0066cc;</attribute>
+                <attribute name="invisible">not (is_fixed and display_type == 'line_section' and line_type != 'otros')</attribute>
             </xpath>
             
             <!-- Configurar vista de líneas del pedido para líneas fijas -->

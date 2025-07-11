@@ -593,17 +593,17 @@ class SaleOrderChapterTemplate(models.Model):
             else:
                 sale_order.order_description = self.description
         
-        # Crear una línea de sección principal con el nombre de la plantilla en grande
-        main_section_vals = {
+        # Crear una línea de título principal con el nombre de la plantilla en grande
+        main_title_vals = {
             'order_id': sale_order.id,
             'display_type': 'line_section',
             'name': f"🔹 {self.name.upper()}",  # Nombre de la plantilla en mayúsculas con icono
             'product_uom_qty': 0.0,
             'price_unit': 0.0,
-            'line_type': 'otros',
+            'line_type': 'otros',  # Usar 'otros' para identificar títulos principales
             'is_fixed': True,
         }
-        self.env['sale.order.line'].with_context(creating_from_template=True).create(main_section_vals)
+        self.env['sale.order.line'].with_context(creating_from_template=True).create(main_title_vals)
         lines_created += 1
         
         # Crear líneas directamente en sale.order.line (incluyendo las secciones como separadores)
@@ -616,7 +616,7 @@ class SaleOrderChapterTemplate(models.Model):
                     'name': f"   ▪ {template_line.name}",  # Indentado con viñeta
                     'product_uom_qty': 0.0,  # Sin cantidad para secciones
                     'price_unit': 0.0,  # Sin precio para secciones
-                    'line_type': template_line.line_type,
+                    'line_type': template_line.line_type,  # Mantener el line_type original para subsecciones
                     'is_fixed': template_line.is_fixed,
                 }
             else:
