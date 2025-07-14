@@ -145,6 +145,11 @@ class SaleOrder(models.Model):
         ('line_note', 'Note')
     ], string='Display Type', help='Campo auxiliar para compatibilidad de vista')
     
+    is_fixed = fields.Boolean(
+        string='Línea Fija',
+        help='Campo auxiliar para compatibilidad de vista'
+    )
+    
     new_chapter_name = fields.Char(
         string='Nombre del Nuevo Capítulo',
         help='Campo temporal para crear capítulos inline'
