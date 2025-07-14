@@ -6,12 +6,6 @@ from odoo import models, fields, api, _
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
     
-    sequence = fields.Integer(
-        string='Secuencia',
-        default=10,
-        help='Secuencia para ordenar las líneas'
-    )
-    
     line_type = fields.Selection([
         ('alquiler', 'Alquiler'),
         ('montaje', 'Montaje'),
