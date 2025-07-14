@@ -72,7 +72,6 @@
                                    context="{'default_line_type': 'alquiler', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_alquiler'}"
                                    domain="[('line_type', '=', 'alquiler')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="sequence" widget="handle"/>
                                     <field name="product_id" 
                                            domain="[('sale_ok', '=', True)]"
                                            context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
@@ -96,7 +95,6 @@
                                    context="{'default_line_type': 'montaje', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_montaje'}"
                                    domain="[('line_type', '=', 'montaje')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="sequence" widget="handle"/>
                                     <field name="product_id" 
                                            domain="[('sale_ok', '=', True)]"
                                            context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
@@ -120,7 +118,6 @@
                                    context="{'default_line_type': 'portes', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_portes'}"
                                    domain="[('line_type', '=', 'portes')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="sequence" widget="handle"/>
                                     <field name="product_id" 
                                            domain="[('sale_ok', '=', True)]"
                                            context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
@@ -144,7 +141,6 @@
                                    context="{'default_line_type': 'otros', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_otros'}"
                                    domain="[('line_type', '=', 'otros')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="sequence" widget="handle"/>
                                     <field name="product_id" 
                                            domain="[('sale_ok', '=', True)]"
                                            context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
@@ -166,7 +162,6 @@
                         <page string="📊 Vista General" name="general_tab">
                             <field name="order_line">
                                 <tree editable="bottom" create="false" delete="false">
-                                    <field name="sequence" widget="handle"/>
                                     <field name="line_type" string="Capítulo"/>
                                     <field name="product_id" readonly="1"/>
                                     <field name="name" readonly="1"/>
@@ -235,7 +230,6 @@
                     </group>
                     <field name="template_line_ids">
                         <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
-                            <field name="sequence" widget="handle"/>
                             <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
                             <field name="name" invisible="1"/>
