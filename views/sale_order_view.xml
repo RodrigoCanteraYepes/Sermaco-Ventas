@@ -41,7 +41,66 @@
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-
+            <!-- Agregar CSS y JavaScript para funcionalidad de colapso -->
+            <xpath expr="//field[@name='order_line']" position="after">
+                <div class="section-collapse-controls">
+                    <style>
+                        .section-collapsed {
+                            opacity: 0.5;
+                            height: 25px;
+                            overflow: hidden;
+                            transition: all 0.3s ease;
+                        }
+                        .section-expanded {
+                            opacity: 1;
+                            height: auto;
+                            transition: all 0.3s ease;
+                        }
+                        .collapse-btn {
+                            cursor: pointer;
+                            margin-left: 5px;
+                            color: #007cba;
+                        }
+                        .collapse-btn:hover {
+                            color: #005a87;
+                        }
+                    </style>
+                    <script type="text/javascript">
+                        odoo.define('sale_order_chapters.collapse', function (require) {
+                            "use strict";
+                            
+                            var core = require('web.core');
+                            var FormController = require('web.FormController');
+                            
+                            FormController.include({
+                                _onCollapseSection: function(ev) {
+                                    var $target = $(ev.currentTarget);
+                                    var $section = $target.closest('tr');
+                                    var sectionKey = $section.data('section-key');
+                                    
+                                    if ($section.hasClass('section-collapsed')) {
+                                        $section.removeClass('section-collapsed').addClass('section-expanded');
+                                        $target.removeClass('fa-plus-square').addClass('fa-minus-square');
+                                        this._showSectionProducts(sectionKey);
+                                    } else {
+                                        $section.removeClass('section-expanded').addClass('section-collapsed');
+                                        $target.removeClass('fa-minus-square').addClass('fa-plus-square');
+                                        this._hideSectionProducts(sectionKey);
+                                    }
+                                },
+                                
+                                _showSectionProducts: function(sectionKey) {
+                                    $('tr[data-section-parent="' + sectionKey + '"]').show();
+                                },
+                                
+                                _hideSectionProducts: function(sectionKey) {
+                                    $('tr[data-section-parent="' + sectionKey + '"]').hide();
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </xpath>
             
 
         </field>
