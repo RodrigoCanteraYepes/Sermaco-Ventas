@@ -50,95 +50,138 @@
                 <field name="order_description" placeholder="Descripción adicional del presupuesto..."/>
             </xpath>
             
-            <!-- Agregar botón de cargar plantilla en la pestaña de líneas del pedido -->
-            <xpath expr="//page[@name='order_lines']//field[@name='order_line']" position="before">
-                <div class="row mb-2">
-                    <div class="col-12">
-                        <button name="action_load_template_to_order_lines" 
-                                string="Cargar Plantilla" 
-                                type="object" 
-                                class="btn-success me-2"
-                                icon="fa-download"
-                                help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
-                                groups="sales_team.group_sale_salesman"/>
+            <!-- Reemplazar la pestaña de líneas del pedido con pestañas por capítulos -->
+            <xpath expr="//page[@name='order_lines']" position="replace">
+                <page string="Capítulos del Presupuesto" name="order_chapters">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button name="action_load_template_to_order_lines" 
+                                    string="Cargar Plantilla" 
+                                    type="object" 
+                                    class="btn-success me-2"
+                                    icon="fa-download"
+                                    help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
+                                    groups="sales_team.group_sale_salesman"/>
+                        </div>
                     </div>
-                </div>
-            </xpath>
-            
-            <!-- Agregar campos is_fixed y line_type a las líneas del pedido -->
-            <xpath expr="//field[@name='order_line']//field[@name='name']" position="after">
-                <field name="is_fixed" string="Fija" readonly="1"/>
-                <field name="line_type" string="Tipo" readonly="1"/>
-                <field name="is_section_collapsed" invisible="1"/>
-                <field name="section_key" invisible="1"/>
-                <!-- Botón de minimizar/expandir para secciones de alquiler y montaje -->
-                <button name="action_toggle_section_collapse" 
-                        type="object" 
-                        icon="fa-minus" 
-                        class="btn-sm btn-outline-secondary"
-                        help="Minimizar esta sección"
-                        context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and is_fixed and line_type in ('alquiler', 'montaje')) or is_section_collapsed"/>
-                <button name="action_toggle_section_collapse" 
-                        type="object" 
-                        icon="fa-plus" 
-                        class="btn-sm btn-outline-secondary"
-                        help="Expandir esta sección"
-                        context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and is_fixed and line_type in ('alquiler', 'montaje')) or not is_section_collapsed"/>
-                <!-- Botón de minimizar/expandir para capítulos (títulos principales) -->
-                <button name="action_toggle_chapter_collapse" 
-                        type="object" 
-                        icon="fa-minus" 
-                        class="btn-sm btn-outline-primary"
-                        help="Minimizar este capítulo"
-                        context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or '')) or is_section_collapsed"/>
-                <button name="action_toggle_chapter_collapse" 
-                        type="object" 
-                        icon="fa-plus" 
-                        class="btn-sm btn-outline-primary"
-                        help="Expandir este capítulo"
-                        context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or '')) or not is_section_collapsed"/>
-            </xpath>
-            
-            <!-- Aplicar estilos especiales para títulos principales de plantillas -->
-            <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
-                <attribute name="style">font-size: 18px; font-weight: bold; color: #0066cc; background-color: #e6f3ff; padding: 8px; border-left: 4px solid #0066cc;</attribute>
-                <attribute name="invisible">not (is_fixed and display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or ''))</attribute>
-            </xpath>
-            
-            <!-- Aplicar estilos a las subsecciones (Alquiler, Montaje, etc.) -->
-            <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
-                <attribute name="decoration-bf">is_fixed and display_type == 'line_section' and line_type != 'otros'</attribute>
-                <attribute name="decoration-info">is_fixed and display_type == 'line_section' and line_type != 'otros'</attribute>
-                <attribute name="style">font-size: 14px; font-weight: bold; color: #0066cc;</attribute>
-                <attribute name="invisible">not (is_fixed and display_type == 'line_section' and line_type != 'otros')</attribute>
-            </xpath>
-            
-            <!-- Configurar vista de líneas del pedido para líneas fijas -->
-            <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="delete">not is_fixed</attribute>
-                <attribute name="handle">not is_fixed</attribute>
-            </xpath>
-            
-            <!-- Ocultar líneas de productos cuando su sección está colapsada -->
-            <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="decoration-muted">is_section_collapsed and not (display_type == 'line_section' and is_fixed)</attribute>
-            </xpath>
-            
-            <!-- Ocultar campos para líneas fijas y ciertos tipos de línea -->
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_qty']" position="attributes">
-                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
-            </xpath>
-            
-            <xpath expr="//field[@name='order_line']//field[@name='price_unit']" position="attributes">
-                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
-            </xpath>
-            
-            <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="attributes">
-                <attribute name="invisible">is_fixed or line_type in ('alquiler', 'montaje', 'portes', 'otros')</attribute>
+                    
+                    <notebook>
+                        <!-- Pestaña Alquiler -->
+                        <page string="🏗️ Alquiler" name="alquiler_tab">
+                            <field name="order_line" 
+                                   context="{'default_line_type': 'alquiler', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_alquiler'}"
+                                   domain="[('line_type', '=', 'alquiler')]">
+                                <tree editable="bottom" create="true" delete="true">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id" 
+                                           domain="[('sale_ok', '=', True)]"
+                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                           force_save="1"/>
+                                    <field name="name" optional="show"/>
+                                    <field name="product_uom_qty" string="Cantidad"/>
+                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
+                                    <field name="price_unit" string="Precio Unit."/>
+                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="price_subtotal" string="Subtotal"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <!-- Pestaña Montaje -->
+                        <page string="🔧 Montaje" name="montaje_tab">
+                            <field name="order_line" 
+                                   context="{'default_line_type': 'montaje', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_montaje'}"
+                                   domain="[('line_type', '=', 'montaje')]">
+                                <tree editable="bottom" create="true" delete="true">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id" 
+                                           domain="[('sale_ok', '=', True)]"
+                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                           force_save="1"/>
+                                    <field name="name" optional="show"/>
+                                    <field name="product_uom_qty" string="Cantidad"/>
+                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
+                                    <field name="price_unit" string="Precio Unit."/>
+                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="price_subtotal" string="Subtotal"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <!-- Pestaña Portes -->
+                        <page string="🚚 Portes" name="portes_tab">
+                            <field name="order_line" 
+                                   context="{'default_line_type': 'portes', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_portes'}"
+                                   domain="[('line_type', '=', 'portes')]">
+                                <tree editable="bottom" create="true" delete="true">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id" 
+                                           domain="[('sale_ok', '=', True)]"
+                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                           force_save="1"/>
+                                    <field name="name" optional="show"/>
+                                    <field name="product_uom_qty" string="Cantidad"/>
+                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
+                                    <field name="price_unit" string="Precio Unit."/>
+                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="price_subtotal" string="Subtotal"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <!-- Pestaña Otros Conceptos -->
+                        <page string="📋 Otros Conceptos" name="otros_tab">
+                            <field name="order_line" 
+                                   context="{'default_line_type': 'otros', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_otros'}"
+                                   domain="[('line_type', '=', 'otros')]">
+                                <tree editable="bottom" create="true" delete="true">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id" 
+                                           domain="[('sale_ok', '=', True)]"
+                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                           force_save="1"/>
+                                    <field name="name" optional="show"/>
+                                    <field name="product_uom_qty" string="Cantidad"/>
+                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
+                                    <field name="price_unit" string="Precio Unit."/>
+                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
+                                    <field name="price_subtotal" string="Subtotal"/>
+                                    <field name="line_type" invisible="1"/>
+                                    <field name="is_fixed" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <!-- Pestaña Vista General (todas las líneas) -->
+                        <page string="📊 Vista General" name="general_tab">
+                            <field name="order_line">
+                                <tree editable="bottom" create="false" delete="false">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="line_type" string="Capítulo"/>
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="name" readonly="1"/>
+                                    <field name="product_uom_qty" string="Cantidad" readonly="1"/>
+                                    <field name="product_uom" string="Unidad" groups="uom.group_uom" readonly="1"/>
+                                    <field name="price_unit" string="Precio Unit." readonly="1"/>
+                                    <field name="tax_ids" widget="many2many_tags" readonly="1"/>
+                                    <field name="price_subtotal" string="Subtotal" readonly="1"/>
+                                    <field name="is_fixed" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </page>
             </xpath>
             
 
