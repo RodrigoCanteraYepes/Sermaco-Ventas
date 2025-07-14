@@ -31,6 +31,18 @@ class SaleOrderLine(models.Model):
         help='Indica si esta línea es fija y no se puede modificar'
     )
     
+    is_section_collapsed = fields.Boolean(
+        string='Sección Colapsada',
+        default=False,
+        help='Indica si esta sección está colapsada'
+    )
+    
+    section_key = fields.Char(
+        string='Clave de Sección',
+        compute='_compute_section_key',
+        help='Clave única para identificar la sección'
+    )
+    
     # Redefinir product_id para permitir borrar productos
     product_id = fields.Many2one(
         'product.product',
@@ -38,6 +50,56 @@ class SaleOrderLine(models.Model):
         ondelete='set null',
         help='Producto asociado a la línea. Se puede borrar sin afectar la línea.'
     )
+    
+    @api.depends('line_type', 'name', 'display_type')
+    def _compute_section_key(self):
+        """Calcula una clave única para identificar la sección"""
+        for line in self:
+            if line.display_type == 'line_section' and line.is_fixed:
+                line.section_key = f"{line.line_type}_{line.name}"
+            else:
+                line.section_key = False
+    
+    def action_toggle_section_collapse(self):
+        """Alterna el estado de colapso de una sección"""
+        self.ensure_one()
+        if not (self.display_type == 'line_section' and self.is_fixed):
+            return
+        
+        import json
+        
+        # Obtener el estado actual de secciones colapsadas
+        collapsed_sections = json.loads(self.order_id.collapsed_sections or '{}')
+        
+        # Alternar el estado de esta sección
+        section_key = self.section_key
+        if section_key in collapsed_sections:
+            del collapsed_sections[section_key]
+            collapsed = False
+        else:
+            collapsed_sections[section_key] = True
+            collapsed = True
+        
+        # Guardar el nuevo estado
+        self.order_id.collapsed_sections = json.dumps(collapsed_sections)
+        
+        # Actualizar el campo is_section_collapsed para todas las líneas de esta sección
+        section_lines = self.order_id.order_line.filtered(
+            lambda l: l.line_type == self.line_type and 
+                     (l.display_type == 'line_section' or not l.is_fixed)
+        )
+        
+        for line in section_lines:
+            if line.display_type == 'line_section' and line.is_fixed:
+                line.is_section_collapsed = collapsed
+            elif not line.is_fixed and line.line_type == self.line_type:
+                # Ocultar/mostrar líneas de productos de esta sección
+                line.is_section_collapsed = collapsed
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
     
     def write(self, vals):
         """Control de permisos para modificar líneas fijas"""
@@ -87,6 +149,12 @@ class SaleOrder(models.Model):
         string='Capítulos Colapsados en Líneas',
         default=False,
         help='Indica si los capítulos están colapsados en las líneas del pedido'
+    )
+    
+    collapsed_sections = fields.Text(
+        string='Secciones Colapsadas',
+        default='{}',
+        help='JSON que almacena qué secciones están colapsadas por tipo'
     )
     
     @api.depends('chapter_ids.total_amount')
@@ -196,6 +264,49 @@ class SaleOrder(models.Model):
         }
     
 
+    
+    def action_toggle_all_sections_collapse(self):
+        """Alterna el estado de colapso de todas las secciones"""
+        self.ensure_one()
+        
+        import json
+        
+        # Obtener el estado actual
+        collapsed_sections = json.loads(self.collapsed_sections or '{}')
+        
+        # Determinar si colapsar o expandir todo
+        section_lines = self.order_line.filtered(
+            lambda l: l.display_type == 'line_section' and l.is_fixed
+        )
+        
+        # Si hay alguna sección expandida, colapsar todas; si no, expandir todas
+        has_expanded = any(line.section_key not in collapsed_sections for line in section_lines)
+        
+        if has_expanded:
+            # Colapsar todas las secciones
+            for line in section_lines:
+                if line.section_key:
+                    collapsed_sections[line.section_key] = True
+        else:
+            # Expandir todas las secciones
+            collapsed_sections = {}
+        
+        # Guardar el nuevo estado
+        self.collapsed_sections = json.dumps(collapsed_sections)
+        
+        # Actualizar todas las líneas
+        for line in self.order_line:
+            if line.display_type == 'line_section' and line.is_fixed:
+                line.is_section_collapsed = line.section_key in collapsed_sections
+            elif not line.is_fixed and line.line_type:
+                # Buscar si la sección padre está colapsada
+                section_key = f"{line.line_type}_{line.line_type.title()}"
+                line.is_section_collapsed = section_key in collapsed_sections
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
     
     def action_load_template(self):
         """Abrir selector de plantillas para cargar en el presupuesto"""
