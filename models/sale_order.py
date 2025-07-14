@@ -399,3 +399,13 @@ class SaleOrder(models.Model):
             },
             'domain': [('active', '=', True)]
         }
+    
+    def action_toggle_all_sections(self):
+        """Expandir o contraer todas las secciones de capítulos"""
+        section_lines = self.order_line.filtered(lambda l: l.display_type == 'line_section')
+        if section_lines:
+            # Alternar el estado de colapso de todas las secciones
+            current_state = section_lines[0].is_section_collapsed if section_lines else False
+            new_state = not current_state
+            section_lines.write({'is_section_collapsed': new_state})
+        return True

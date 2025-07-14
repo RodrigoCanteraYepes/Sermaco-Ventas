@@ -15,96 +15,47 @@
                 <field name="order_description" placeholder="Descripción adicional del presupuesto..."/>
             </xpath>
             
-            <!-- Agregar pestaña de capítulos después de la pestaña original -->
-            <xpath expr="//page[@name='order_lines']" position="after">
-                <page string="Capítulos del Presupuesto" name="order_chapters">
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <button name="action_load_template_to_order_lines" 
-                                    string="Cargar Plantilla" 
-                                    type="object" 
-                                    class="btn-success me-2"
-                                    icon="fa-download"
-                                    help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
-                                    groups="sales_team.group_sale_salesman"/>
-                        </div>
+            <!-- Agregar botón de cargar plantilla antes del campo order_line -->
+            <xpath expr="//field[@name='order_line']" position="before">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button name="action_load_template_to_order_lines" 
+                                string="Cargar Plantilla" 
+                                type="object" 
+                                class="btn-success me-2"
+                                icon="fa-download"
+                                help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
+                                groups="sales_team.group_sale_salesman"/>
+                        <button name="action_toggle_all_sections" 
+                                string="Expandir/Contraer Todo" 
+                                type="object" 
+                                class="btn-info me-2"
+                                icon="fa-expand"
+                                help="Expandir o contraer todas las secciones"/>
                     </div>
-                    
-                    <notebook>
-                        <!-- Pestaña Alquiler -->
-                        <page string="🏗️ Alquiler" name="alquiler_tab">
-                            <field name="order_line" 
-                                   context="{'default_line_type': 'alquiler'}"
-                                   domain="[('line_type', '=', 'alquiler')]">
-                                <tree editable="bottom" create="true" delete="true">
-                                    <field name="name" optional="show"/>
-                                    <field name="product_uom_qty" string="Cantidad"/>
-                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
-                                    <field name="price_unit" string="Precio Unit."/>
-                                    <field name="price_subtotal" string="Subtotal"/>
-                                </tree>
-                            </field>
-                        </page>
-                        
-                        <!-- Pestaña Montaje -->
-                        <page string="🔧 Montaje" name="montaje_tab">
-                            <field name="order_line" 
-                                   context="{'default_line_type': 'montaje'}"
-                                   domain="[('line_type', '=', 'montaje')]">
-                                <tree editable="bottom" create="true" delete="true">
-                                    <field name="name" optional="show"/>
-                                    <field name="product_uom_qty" string="Cantidad"/>
-                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
-                                    <field name="price_unit" string="Precio Unit."/>
-                                    <field name="price_subtotal" string="Subtotal"/>
-                                </tree>
-                            </field>
-                        </page>
-                        
-                        <!-- Pestaña Portes -->
-                        <page string="🚚 Portes" name="portes_tab">
-                            <field name="order_line" 
-                                   context="{'default_line_type': 'portes'}"
-                                   domain="[('line_type', '=', 'portes')]">
-                                <tree editable="bottom" create="true" delete="true">
-                                    <field name="name" optional="show"/>
-                                    <field name="product_uom_qty" string="Cantidad"/>
-                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
-                                    <field name="price_unit" string="Precio Unit."/>
-                                    <field name="price_subtotal" string="Subtotal"/>
-                                </tree>
-                            </field>
-                        </page>
-                        
-                        <!-- Pestaña Otros Conceptos -->
-                        <page string="📋 Otros Conceptos" name="otros_tab">
-                            <field name="order_line" 
-                                   context="{'default_line_type': 'otros'}"
-                                   domain="[('line_type', '=', 'otros')]">
-                                <tree editable="bottom" create="true" delete="true">
-                                    <field name="name" optional="show"/>
-                                    <field name="product_uom_qty" string="Cantidad"/>
-                                    <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
-                                    <field name="price_unit" string="Precio Unit."/>
-                                    <field name="price_subtotal" string="Subtotal"/>
-                                </tree>
-                            </field>
-                        </page>
-                        
-                        <!-- Pestaña Vista General (todas las líneas) -->
-                        <page string="📊 Vista General" name="general_tab">
-                            <field name="order_line">
-                                <tree editable="bottom" create="false" delete="false">
-                                    <field name="name" readonly="1"/>
-                                    <field name="product_uom_qty" string="Cantidad" readonly="1"/>
-                                    <field name="product_uom" string="Unidad" groups="uom.group_uom" readonly="1"/>
-                                    <field name="price_unit" string="Precio Unit." readonly="1"/>
-                                    <field name="price_subtotal" string="Subtotal" readonly="1"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </page>
+                </div>
+            </xpath>
+            
+            <!-- Reemplazar la vista tree con una vista list -->
+            <xpath expr="//field[@name='order_line']/tree" position="replace">
+                <list string="Sales Order Lines" editable="bottom">
+                    <field name="display_type" invisible="1"/>
+                    <field name="chapter_name" string="Capítulo" optional="show"/>
+                    <field name="line_type" string="Tipo" optional="show"/>
+                    <field name="product_id" 
+                           context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                           attrs="{'readonly': [('display_type', '!=', False)]}"
+                           domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                           force_save="1"/>
+                    <field name="name" optional="show"/>
+                    <field name="product_uom_qty" string="Quantity" context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"/>
+                    <field name="product_uom" force_save="1" string="UoM" context="{'company_id': parent.company_id}" groups="uom.group_uom" optional="show"/>
+                    <field name="price_unit" attrs="{'readonly': [('display_type', '!=', False)]}"/>
+                    <field name="tax_id" widget="many2many_tags" options="{'no_create': True}" context="{'default_type_tax_use': 'sale', 'search_view_ref': 'account.account_tax_view_search'}" attrs="{'readonly': [('display_type', '!=', False)]}" optional="show"/>
+                    <field name="discount" string="Disc.%" optional="show" attrs="{'readonly': [('display_type', '!=', False)]}"/>
+                    <field name="price_subtotal" widget="monetary" groups="account.group_show_line_subtotals_tax_excluded"/>
+                    <field name="price_total" widget="monetary" groups="account.group_show_line_subtotals_tax_included"/>
+                </list>
             </xpath>
             
 
