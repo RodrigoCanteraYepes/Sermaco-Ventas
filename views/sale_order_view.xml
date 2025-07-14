@@ -36,9 +36,65 @@
                 </div>
             </xpath>
             
-            <!-- Agregar campos personalizados al campo order_line existente -->
-            <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
+            <!-- Reemplazar la vista tree de order_line con una personalizada -->
+            <xpath expr="//field[@name='order_line']" position="replace">
+                <field name="order_line" context="{'default_order_id': id, 'show_chapters': True}">
+                    <tree editable="bottom" decoration-info="display_type == 'line_section'" decoration-muted="is_section_collapsed and display_type != 'line_section'">
+                        <!-- Botón de colapso solo para secciones fijas -->
+                        <field name="display_type" invisible="1"/>
+                        <field name="is_fixed" invisible="1"/>
+                        <field name="is_section_collapsed" invisible="1"/>
+                        <field name="line_type" invisible="1"/>
+                        <field name="section_key" invisible="1"/>
+                        
+                        <!-- Botón de colapso/expansión para secciones -->
+                        <button name="action_toggle_section_collapse" 
+                                type="object" 
+                                icon="fa-minus-square" 
+                                class="btn-link text-primary" 
+                                title="Contraer sección"
+                                invisible="not (display_type == 'line_section' and is_fixed and not is_section_collapsed)"/>
+                        <button name="action_toggle_section_collapse" 
+                                type="object" 
+                                icon="fa-plus-square" 
+                                class="btn-link text-primary" 
+                                title="Expandir sección"
+                                invisible="not (display_type == 'line_section' and is_fixed and is_section_collapsed)"/>
+                        
+                        <!-- Campos principales -->
+                        <field name="chapter_name" string="Capítulo" readonly="1" optional="hide"/>
+                        <field name="product_id" 
+                               context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                               domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="name" 
+                               readonly="is_fixed and line_type in ('alquiler', 'montaje')"
+                               invisible="is_section_collapsed and display_type != 'line_section'"/>
+                        <field name="product_uom_qty" 
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="product_uom" 
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="price_unit" 
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="tax_id" 
+                               widget="many2many_tags" 
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="discount" 
+                               readonly="is_fixed"
+                               invisible="display_type in ('line_section', 'line_note') or (is_section_collapsed and display_type != 'line_section')"/>
+                        <field name="price_subtotal" 
+                               readonly="1"
+                               invisible="is_section_collapsed and display_type != 'line_section'"/>
+                        <field name="price_total" 
+                               readonly="1"
+                               invisible="is_section_collapsed and display_type != 'line_section'"/>
+                    </tree>
+                </field>
             </xpath>
             
 
