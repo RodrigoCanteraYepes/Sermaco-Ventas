@@ -65,40 +65,7 @@
                             color: #005a87;
                         }
                     </style>
-                    <script type="text/javascript">
-                        odoo.define('sale_order_chapters.collapse', function (require) {
-                            "use strict";
-                            
-                            var core = require('web.core');
-                            var FormController = require('web.FormController');
-                            
-                            FormController.include({
-                                _onCollapseSection: function(ev) {
-                                    var $target = $(ev.currentTarget);
-                                    var $section = $target.closest('tr');
-                                    var sectionKey = $section.data('section-key');
-                                    
-                                    if ($section.hasClass('section-collapsed')) {
-                                        $section.removeClass('section-collapsed').addClass('section-expanded');
-                                        $target.removeClass('fa-plus-square').addClass('fa-minus-square');
-                                        this._showSectionProducts(sectionKey);
-                                    } else {
-                                        $section.removeClass('section-expanded').addClass('section-collapsed');
-                                        $target.removeClass('fa-minus-square').addClass('fa-plus-square');
-                                        this._hideSectionProducts(sectionKey);
-                                    }
-                                },
-                                
-                                _showSectionProducts: function(sectionKey) {
-                                    $('tr[data-section-parent="' + sectionKey + '"]').show();
-                                },
-                                
-                                _hideSectionProducts: function(sectionKey) {
-                                    $('tr[data-section-parent="' + sectionKey + '"]').hide();
-                                }
-                            });
-                        });
-                    </script>
+                    <!-- JavaScript removido para evitar errores de dependencias -->
                 </div>
             </xpath>
             
