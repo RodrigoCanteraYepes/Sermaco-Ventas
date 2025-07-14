@@ -63,7 +63,7 @@ class SaleOrderLine(models.Model):
     def action_toggle_section_collapse(self):
         """Alterna el estado de colapso de una sección"""
         self.ensure_one()
-        if not (self.display_type == 'line_section' and self.is_fixed):
+        if not (self.display_type == 'line_section' and self.is_fixed and self.line_type in ('alquiler', 'montaje')):
             return
         
         import json
@@ -101,21 +101,60 @@ class SaleOrderLine(models.Model):
             'tag': 'reload',
         }
     
+    def action_toggle_chapter_collapse(self):
+        """Alterna el estado de colapso de un capítulo completo"""
+        self.ensure_one()
+        if not (self.display_type == 'line_section' and self.line_type == 'otros' and '🔹' in (self.name or '')):
+            return
+        
+        import json
+        
+        # Obtener el estado actual de secciones colapsadas
+        collapsed_sections = json.loads(self.order_id.collapsed_sections or '{}')
+        
+        # Crear clave única para el capítulo
+        chapter_key = f"chapter_{self.source_chapter_id.id if self.source_chapter_id else self.name}"
+        
+        # Alternar el estado del capítulo
+        if chapter_key in collapsed_sections:
+            del collapsed_sections[chapter_key]
+            collapsed = False
+        else:
+            collapsed_sections[chapter_key] = True
+            collapsed = True
+        
+        # Guardar el nuevo estado
+        self.order_id.collapsed_sections = json.dumps(collapsed_sections)
+        
+        # Actualizar todas las líneas del mismo capítulo
+        chapter_lines = self.order_id.order_line.filtered(
+            lambda l: l.source_chapter_id == self.source_chapter_id
+        )
+        
+        for line in chapter_lines:
+            line.is_section_collapsed = collapsed
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
+    
     def write(self, vals):
         """Control de permisos para modificar líneas fijas"""
         for line in self:
-            if line.is_fixed and not self.env.context.get('creating_from_template'):
-                # Las líneas fijas no se pueden modificar en absoluto (ni siquiera la secuencia)
+            # Solo las secciones de alquiler y montaje son fijas e inmovibles
+            if line.is_fixed and line.line_type in ('alquiler', 'montaje') and not self.env.context.get('creating_from_template'):
                 from odoo.exceptions import AccessError
-                raise AccessError(_('Las líneas fijas no se pueden modificar, mover ni cambiar. Solo se pueden editar desde las plantillas de capítulos.'))
+                raise AccessError(_('Las secciones de alquiler y montaje no se pueden modificar, mover ni cambiar. Solo se pueden editar desde las plantillas de capítulos.'))
         return super().write(vals)
     
     def unlink(self):
         """Control de permisos para eliminar líneas fijas"""
         for line in self:
-            if line.is_fixed:
+            # Solo las secciones de alquiler y montaje no se pueden eliminar
+            if line.is_fixed and line.line_type in ('alquiler', 'montaje'):
                 from odoo.exceptions import AccessError
-                raise AccessError(_('Las líneas fijas no se pueden eliminar. Solo se pueden editar desde las plantillas de capítulos.'))
+                raise AccessError(_('Las secciones de alquiler y montaje no se pueden eliminar. Solo se pueden editar desde las plantillas de capítulos.'))
         return super().unlink()
 
 
@@ -242,6 +281,8 @@ class SaleOrder(models.Model):
                 # Crear línea en sale.order.line
                 if line.is_fixed:
                     # Para líneas fijas (secciones), crear como sección
+                    # Solo las secciones de alquiler y montaje permanecen fijas
+                    is_fixed_section = line.line_type in ('alquiler', 'montaje')
                     sale_line_vals = {
                         'order_id': self.id,
                         'display_type': 'line_section',
@@ -250,10 +291,10 @@ class SaleOrder(models.Model):
                         'price_unit': 0.0,
                         'line_type': line.line_type,
                         'source_chapter_id': chapter.id,
-                        'is_fixed': line.is_fixed,
+                        'is_fixed': is_fixed_section,
                     }
                 else:
-                    # Para líneas normales
+                    # Para líneas normales - todas son editables independientemente del tipo
                     sale_line_vals = {
                         'order_id': self.id,
                         'product_id': line.product_id.id if line.product_id else False,
@@ -263,7 +304,7 @@ class SaleOrder(models.Model):
                         'price_unit': price_unit,
                         'line_type': line.line_type,
                         'source_chapter_id': chapter.id,
-                        'is_fixed': line.is_fixed,
+                        'is_fixed': False,  # Todos los productos son editables
                     }
                 
                 self.env['sale.order.line'].create(sale_line_vals)

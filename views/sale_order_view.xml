@@ -61,13 +61,6 @@
                                 icon="fa-download"
                                 help="Seleccionar y cargar una plantilla directamente en las líneas del pedido"
                                 groups="sales_team.group_sale_salesman"/>
-                        <button name="action_toggle_all_sections_collapse" 
-                                string="Minimizar/Expandir Todo" 
-                                type="object" 
-                                class="btn-secondary me-2"
-                                icon="fa-compress"
-                                help="Minimizar o expandir todas las secciones"
-                                groups="sales_team.group_sale_salesman"/>
                     </div>
                 </div>
             </xpath>
@@ -78,21 +71,36 @@
                 <field name="line_type" string="Tipo" readonly="1"/>
                 <field name="is_section_collapsed" invisible="1"/>
                 <field name="section_key" invisible="1"/>
-                <!-- Botón de minimizar/expandir para secciones -->
+                <!-- Botón de minimizar/expandir para secciones de alquiler y montaje -->
                 <button name="action_toggle_section_collapse" 
                         type="object" 
                         icon="fa-minus" 
                         class="btn-sm btn-outline-secondary"
                         help="Minimizar esta sección"
                         context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and is_fixed) or is_section_collapsed"/>
+                        invisible="not (display_type == 'line_section' and is_fixed and line_type in ('alquiler', 'montaje')) or is_section_collapsed"/>
                 <button name="action_toggle_section_collapse" 
                         type="object" 
                         icon="fa-plus" 
                         class="btn-sm btn-outline-secondary"
                         help="Expandir esta sección"
                         context="{'line_id': id}"
-                        invisible="not (display_type == 'line_section' and is_fixed) or not is_section_collapsed"/>
+                        invisible="not (display_type == 'line_section' and is_fixed and line_type in ('alquiler', 'montaje')) or not is_section_collapsed"/>
+                <!-- Botón de minimizar/expandir para capítulos (títulos principales) -->
+                <button name="action_toggle_chapter_collapse" 
+                        type="object" 
+                        icon="fa-minus" 
+                        class="btn-sm btn-outline-primary"
+                        help="Minimizar este capítulo"
+                        context="{'line_id': id}"
+                        invisible="not (display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or '')) or is_section_collapsed"/>
+                <button name="action_toggle_chapter_collapse" 
+                        type="object" 
+                        icon="fa-plus" 
+                        class="btn-sm btn-outline-primary"
+                        help="Expandir este capítulo"
+                        context="{'line_id': id}"
+                        invisible="not (display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or '')) or not is_section_collapsed"/>
             </xpath>
             
             <!-- Aplicar estilos especiales para títulos principales de plantillas -->
