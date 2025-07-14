@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Datos básicos para asegurar la carga correcta de los modelos -->
+    
+    <!-- Registro de modelo sale.order.chapter -->
+    <record id="model_sale_order_chapter" model="ir.model">
+        <field name="name">sale.order.chapter</field>
+        <field name="model">sale.order.chapter</field>
+        <field name="state">base</field>
+    </record>
+    
+    <!-- Registro de modelo sale.order.chapter.line -->
+    <record id="model_sale_order_chapter_line" model="ir.model">
+        <field name="name">sale.order.chapter.line</field>
+        <field name="model">sale.order.chapter.line</field>
+        <field name="state">base</field>
+    </record>
+    
+    <!-- Registro de modelo sale.order.chapter.template -->
+    <record id="model_sale_order_chapter_template" model="ir.model">
+        <field name="name">sale.order.chapter.template</field>
+        <field name="model">sale.order.chapter.template</field>
+        <field name="state">base</field>
+    </record>
+    
+    <!-- Registro de modelo sale.order.chapter.template.line -->
+    <record id="model_sale_order_chapter_template_line" model="ir.model">
+        <field name="name">sale.order.chapter.template.line</field>
+        <field name="model">sale.order.chapter.template.line</field>
+        <field name="state">base</field>
+    </record>
+    
+</odoo>
