@@ -36,39 +36,12 @@
                 </div>
             </xpath>
             
-            <!-- Modificar la vista tree de order_line existente -->
+            <!-- Configurar contexto del campo order_line -->
             <xpath expr="//field[@name='order_line']" position="attributes">
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-            <!-- Agregar campos personalizados a la vista tree de order_line -->
-            <xpath expr="//field[@name='order_line']/tree" position="inside">
-                <!-- Campos auxiliares invisibles -->
-                <field name="line_type" invisible="1"/>
-                <field name="is_fixed" invisible="1"/>
-                <field name="is_section_collapsed" invisible="1"/>
-                <field name="section_key" invisible="1"/>
-                <field name="chapter_name" string="Capítulo" optional="hide"/>
-                
-                <!-- Botón de colapso/expansión para secciones -->
-                <button name="action_toggle_section_collapse" 
-                        type="object" 
-                        icon="fa-minus-square" 
-                        class="btn-link text-primary" 
-                        title="Contraer sección"
-                        invisible="not (display_type == 'line_section' and is_fixed and not is_section_collapsed)"/>
-                <button name="action_toggle_section_collapse" 
-                        type="object" 
-                        icon="fa-plus-square" 
-                        class="btn-link text-primary" 
-                        title="Expandir sección"
-                        invisible="not (display_type == 'line_section' and is_fixed and is_section_collapsed)"/>
-            </xpath>
-            
-            <!-- Agregar decoraciones para secciones colapsadas -->
-            <xpath expr="//field[@name='order_line']/tree" position="attributes">
-                <attribute name="decoration-muted">is_section_collapsed and display_type != 'line_section'</attribute>
-            </xpath>
+
             
 
         </field>
