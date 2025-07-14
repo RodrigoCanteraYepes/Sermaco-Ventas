@@ -157,6 +157,12 @@ class SaleOrder(models.Model):
         help='JSON que almacena qué secciones están colapsadas por tipo'
     )
     
+    is_section_collapsed = fields.Boolean(
+        string='Sección Colapsada (Auxiliar)',
+        default=False,
+        help='Campo auxiliar para la vista - no se usa directamente'
+    )
+    
     @api.depends('chapter_ids.total_amount')
     def _compute_chapters_total(self):
         for order in self:
