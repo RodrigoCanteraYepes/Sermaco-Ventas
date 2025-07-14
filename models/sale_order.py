@@ -140,6 +140,11 @@ class SaleOrder(models.Model):
         currency_field='currency_id'
     )
     
+    display_type = fields.Selection([
+        ('line_section', 'Section'),
+        ('line_note', 'Note')
+    ], string='Display Type', help='Campo auxiliar para compatibilidad de vista')
+    
     new_chapter_name = fields.Char(
         string='Nombre del Nuevo Capítulo',
         help='Campo temporal para crear capítulos inline'
