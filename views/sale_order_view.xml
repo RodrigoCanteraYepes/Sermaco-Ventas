@@ -84,12 +84,14 @@
                         icon="fa-minus" 
                         class="btn-sm btn-outline-secondary"
                         help="Minimizar esta sección"
+                        context="{'line_id': id}"
                         invisible="not (display_type == 'line_section' and is_fixed) or is_section_collapsed"/>
                 <button name="action_toggle_section_collapse" 
                         type="object" 
                         icon="fa-plus" 
                         class="btn-sm btn-outline-secondary"
                         help="Expandir esta sección"
+                        context="{'line_id': id}"
                         invisible="not (display_type == 'line_section' and is_fixed) or not is_section_collapsed"/>
             </xpath>
             

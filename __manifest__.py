@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sale Order Chapters',
-    'version': '18.0.1.0.27',
+    'version': '18.0.1.0.28',
     'category': 'Sales',
     'summary': 'Añade capítulos personalizados a los presupuestos de venta',
     'description': """
