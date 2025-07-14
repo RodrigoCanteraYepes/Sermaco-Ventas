@@ -221,7 +221,10 @@ class SaleOrderChapterLine(models.Model):
         ondelete='set null'
     )
     
-    # Campo name eliminado - no queremos descripción en las líneas de plantilla
+    name = fields.Char(
+        string='Descripción',
+        help='Descripción de la línea'
+    )
     
     product_uom_qty = fields.Float(
         string='Cantidad',
