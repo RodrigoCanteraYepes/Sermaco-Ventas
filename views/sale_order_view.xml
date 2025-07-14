@@ -38,7 +38,7 @@
             
             <!-- Agregar campos personalizados al campo order_line existente -->
             <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="context">{'default_order_id': active_id, 'show_chapters': True}</attribute>
+                <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
 
