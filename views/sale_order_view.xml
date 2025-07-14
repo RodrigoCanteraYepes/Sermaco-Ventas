@@ -2,42 +2,7 @@
 <odoo>
     <!-- Las vistas de diálogo han sido eliminadas - funcionalidad integrada en el tab principal -->
 
-    <!-- Vista de formulario para Sale Order Chapter Line -->
-    <record id="view_sale_order_chapter_line_form" model="ir.ui.view">
-        <field name="name">sale.order.chapter.line.form</field>
-        <field name="model">sale.order.chapter.line</field>
-        <field name="arch" type="xml">
-            <form string="Línea del Capítulo">
-                <header>
-                    <button name="action_transfer_to_order_lines" 
-                            string="Transferir a Líneas del Pedido" 
-                            type="object" 
-                            class="btn-primary"
-                            help="Transfiere esta línea a las líneas del pedido de venta"/>
-                </header>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="line_type"/>
-                            <field name="product_id"/>
-                            <field name="sequence"/>
-                        </group>
-                        <group>
-                            <field name="product_uom_qty"/>
-                            <field name="product_uom"/>
-                            <field name="price_unit" column_invisible="line_type == 'alquiler'"/>
-                            <field name="rental_period_type" column_invisible="line_type != 'alquiler'"/>
-                             <field name="rental_periods" column_invisible="line_type != 'alquiler'"/>
-                             <field name="price_per_period" column_invisible="line_type != 'alquiler'"/>
-                            <field name="tax_ids" widget="many2many_tags"/>
-                            <field name="price_subtotal" widget="monetary"/>
-                            <field name="currency_id" invisible="1"/>
-                        </group>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+    <!-- Las vistas de formulario para modelos personalizados se generan automáticamente -->
 
     <!-- Herencia de la vista de formulario de Sale Order -->
     <record id="view_order_form_inherit_chapters" model="ir.ui.view">
