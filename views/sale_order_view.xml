@@ -34,7 +34,7 @@
                         <!-- Pestaña Alquiler -->
                         <page string="🏗️ Alquiler" name="alquiler_tab">
                             <field name="order_line" 
-                                   context="{'default_line_type': 'alquiler', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_alquiler'}"
+                                   context="{'default_line_type': 'alquiler'}"
                                    domain="[('line_type', '=', 'alquiler')]">
                                 <tree editable="bottom" create="true" delete="true">
                                     <field name="product_id" 
@@ -57,7 +57,7 @@
                         <!-- Pestaña Montaje -->
                         <page string="🔧 Montaje" name="montaje_tab">
                             <field name="order_line" 
-                                   context="{'default_line_type': 'montaje', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_montaje'}"
+                                   context="{'default_line_type': 'montaje'}"
                                    domain="[('line_type', '=', 'montaje')]">
                                 <tree editable="bottom" create="true" delete="true">
                                     <field name="product_id" 
@@ -80,7 +80,7 @@
                         <!-- Pestaña Portes -->
                         <page string="🚚 Portes" name="portes_tab">
                             <field name="order_line" 
-                                   context="{'default_line_type': 'portes', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_portes'}"
+                                   context="{'default_line_type': 'portes'}"
                                    domain="[('line_type', '=', 'portes')]">
                                 <tree editable="bottom" create="true" delete="true">
                                     <field name="product_id" 
@@ -103,7 +103,7 @@
                         <!-- Pestaña Otros Conceptos -->
                         <page string="📋 Otros Conceptos" name="otros_tab">
                             <field name="order_line" 
-                                   context="{'default_line_type': 'otros', 'tree_view_ref': 'sale_order_chapters.view_order_line_tree_otros'}"
+                                   context="{'default_line_type': 'otros'}"
                                    domain="[('line_type', '=', 'otros')]">
                                 <tree editable="bottom" create="true" delete="true">
                                     <field name="product_id" 
