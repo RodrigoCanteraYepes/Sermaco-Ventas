@@ -15,8 +15,8 @@
                 <field name="order_description" placeholder="Descripción adicional del presupuesto..."/>
             </xpath>
             
-            <!-- Reemplazar la pestaña de líneas del pedido con pestañas por capítulos -->
-            <xpath expr="//page[@name='order_lines']" position="replace">
+            <!-- Agregar pestaña de capítulos después de la pestaña original -->
+            <xpath expr="//page[@name='order_lines']" position="after">
                 <page string="Capítulos del Presupuesto" name="order_chapters">
                     <div class="row mb-3">
                         <div class="col-12">
@@ -37,19 +37,11 @@
                                    context="{'default_line_type': 'alquiler'}"
                                    domain="[('line_type', '=', 'alquiler')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="product_id" 
-                                           domain="[('sale_ok', '=', True)]"
-                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
-                                           force_save="1"/>
                                     <field name="name" optional="show"/>
                                     <field name="product_uom_qty" string="Cantidad"/>
                                     <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
                                     <field name="price_unit" string="Precio Unit."/>
-                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
                                     <field name="price_subtotal" string="Subtotal"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed" invisible="1"/>
-                                    <field name="display_type" invisible="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -60,19 +52,11 @@
                                    context="{'default_line_type': 'montaje'}"
                                    domain="[('line_type', '=', 'montaje')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="product_id" 
-                                           domain="[('sale_ok', '=', True)]"
-                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
-                                           force_save="1"/>
                                     <field name="name" optional="show"/>
                                     <field name="product_uom_qty" string="Cantidad"/>
                                     <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
                                     <field name="price_unit" string="Precio Unit."/>
-                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
                                     <field name="price_subtotal" string="Subtotal"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed" invisible="1"/>
-                                    <field name="display_type" invisible="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -83,19 +67,11 @@
                                    context="{'default_line_type': 'portes'}"
                                    domain="[('line_type', '=', 'portes')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="product_id" 
-                                           domain="[('sale_ok', '=', True)]"
-                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
-                                           force_save="1"/>
                                     <field name="name" optional="show"/>
                                     <field name="product_uom_qty" string="Cantidad"/>
                                     <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
                                     <field name="price_unit" string="Precio Unit."/>
-                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
                                     <field name="price_subtotal" string="Subtotal"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed" invisible="1"/>
-                                    <field name="display_type" invisible="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -106,19 +82,11 @@
                                    context="{'default_line_type': 'otros'}"
                                    domain="[('line_type', '=', 'otros')]">
                                 <tree editable="bottom" create="true" delete="true">
-                                    <field name="product_id" 
-                                           domain="[('sale_ok', '=', True)]"
-                                           context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
-                                           force_save="1"/>
                                     <field name="name" optional="show"/>
                                     <field name="product_uom_qty" string="Cantidad"/>
                                     <field name="product_uom" string="Unidad" groups="uom.group_uom"/>
                                     <field name="price_unit" string="Precio Unit."/>
-                                    <field name="tax_ids" widget="many2many_tags" optional="show"/>
                                     <field name="price_subtotal" string="Subtotal"/>
-                                    <field name="line_type" invisible="1"/>
-                                    <field name="is_fixed" invisible="1"/>
-                                    <field name="display_type" invisible="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -127,16 +95,11 @@
                         <page string="📊 Vista General" name="general_tab">
                             <field name="order_line">
                                 <tree editable="bottom" create="false" delete="false">
-                                    <field name="line_type" string="Capítulo"/>
-                                    <field name="product_id" readonly="1"/>
                                     <field name="name" readonly="1"/>
                                     <field name="product_uom_qty" string="Cantidad" readonly="1"/>
                                     <field name="product_uom" string="Unidad" groups="uom.group_uom" readonly="1"/>
                                     <field name="price_unit" string="Precio Unit." readonly="1"/>
-                                    <field name="tax_ids" widget="many2many_tags" readonly="1"/>
                                     <field name="price_subtotal" string="Subtotal" readonly="1"/>
-                                    <field name="is_fixed" invisible="1"/>
-                                    <field name="display_type" invisible="1"/>
                                 </tree>
                             </field>
                         </page>
