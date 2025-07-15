@@ -41,21 +41,11 @@
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-            <!-- Personalizar la vista de líneas del pedido para agregar botones de colapso -->
-            <xpath expr="//field[@name='order_line']/tree" position="inside">
-                <!-- Campos necesarios para la funcionalidad de colapso -->
+            <!-- Personalizar la vista de líneas del pedido para agregar campos de colapso -->
+            <xpath expr="//field[@name='order_line']" position="after">
+                <!-- Campos necesarios para la funcionalidad de colapso (invisibles) -->
                 <field name="line_type" invisible="1"/>
                 <field name="is_fixed" invisible="1"/>
-                <!-- Campo para mostrar el icono de colapso -->
-                <field name="collapse_icon" invisible="not (display_type == 'line_section' and is_fixed)" readonly="1" nolabel="1" width="30px"/>
-                <!-- Botón de colapso individual para secciones fijas -->
-                <button name="action_toggle_section_collapse" 
-                        string="" 
-                        type="object" 
-                        icon="fa-expand-arrows-alt" 
-                        class="btn-sm btn-outline-primary"
-                        help="Contraer/Expandir esta sección"
-                        invisible="not (display_type == 'line_section' and is_fixed)"/>
             </xpath>
             
             <!-- Agregar contenedor para funcionalidad de colapso -->
