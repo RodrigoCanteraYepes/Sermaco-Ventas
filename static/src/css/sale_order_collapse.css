@@ -1,0 +1,100 @@
+/* Estilos para funcionalidad de colapso/expansión de secciones */
+
+.section-line {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-left: 4px solid #007cba;
+}
+
+.section-collapsed {
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.section-expanded {
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.collapse-icon {
+    cursor: pointer;
+    margin-right: 8px;
+    color: #007cba;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.collapse-icon:hover {
+    color: #005a87;
+    transform: scale(1.1);
+}
+
+.section-controls {
+    margin-bottom: 10px;
+}
+
+.section-controls .btn {
+    margin-right: 5px;
+}
+
+/* Animaciones para mostrar/ocultar líneas de productos */
+.product-line {
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.product-line.hidden {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Estilos para los botones de control */
+.btn-collapse-all {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-collapse-all:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-expand-all {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-expand-all:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Indicadores visuales para secciones */
+.section-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #007cba;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.section-collapsed .section-indicator {
+    background-color: #6c757d;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .collapse-icon {
+        font-size: 16px;
+        margin-right: 5px;
+    }
+    
+    .section-controls .btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}

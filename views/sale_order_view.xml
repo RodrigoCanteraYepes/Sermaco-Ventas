@@ -41,31 +41,16 @@
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-            <!-- Agregar CSS y JavaScript para funcionalidad de colapso -->
+            <!-- Agregar contenedor para funcionalidad de colapso -->
             <xpath expr="//field[@name='order_line']" position="after">
                 <div class="section-collapse-controls">
-                    <style>
-                        .section-collapsed {
-                            opacity: 0.5;
-                            height: 25px;
-                            overflow: hidden;
-                            transition: all 0.3s ease;
-                        }
-                        .section-expanded {
-                            opacity: 1;
-                            height: auto;
-                            transition: all 0.3s ease;
-                        }
-                        .collapse-btn {
-                            cursor: pointer;
-                            margin-left: 5px;
-                            color: #007cba;
-                        }
-                        .collapse-btn:hover {
-                            color: #005a87;
-                        }
-                    </style>
-                    <!-- JavaScript removido para evitar errores de dependencias -->
+                    <!-- Los estilos CSS y JavaScript se cargan desde archivos separados -->
+                    <div class="alert alert-info" style="margin-top: 10px;">
+                        <i class="fa fa-info-circle"></i>
+                        <strong>Funcionalidad de Secciones:</strong>
+                        Utiliza los botones "Expandir/Contraer Todo" para gestionar la visibilidad de las secciones.
+                        Cada sección individual puede expandirse/contraerse haciendo clic en su icono.
+                    </div>
                 </div>
             </xpath>
             
