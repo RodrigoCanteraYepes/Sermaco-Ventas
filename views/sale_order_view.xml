@@ -83,19 +83,13 @@
                        
                 <field name="name"/>
                        
-                <field name="product_uom_qty" 
+                <field name="product_uom_qty" string="Cantidad"
                        invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
-                <field name="product_uom" 
+                <field name="price_unit" string="Precio"
                        invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
-                <field name="price_unit" 
-                       invisible="display_type == 'line_section' or is_section_collapsed"/>
-                       
-                <field name="tax_id" widget="many2many_tags" 
-                       invisible="display_type == 'line_section' or is_section_collapsed"/>
-                       
-                <field name="price_subtotal" 
+                <field name="price_subtotal" string="Subtotal"
                        invisible="display_type == 'line_section' or is_section_collapsed"/>
             </list>
         </field>
@@ -153,21 +147,19 @@
                         Por ejemplo, al seleccionar "Alquiler" solo aparecerán productos relacionados con alquiler.
                     </div>
                     <field name="template_line_ids">
-                        <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
+                        <list editable="bottom" string="Líneas de la Plantilla">
                             <field name="template_id" invisible="1"/>
                             <field name="product_domain" invisible="1"/>
+                            <field name="name" invisible="1"/>
                             <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
-                            <field name="name" invisible="1"/>
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
-                                   placeholder="Selecciona un producto (filtrado por tipo de sección)..."
+                                   placeholder="Selecciona un producto..."
                                    context="{'line_type': line_type}"
                                    domain="product_domain"/>
-                            <field name="product_uom_qty" invisible="is_fixed"/>
-                            <field name="product_uom" invisible="is_fixed"/>
-                            <field name="price_unit" widget="monetary" invisible="is_fixed"/>
-                            <field name="tax_ids" widget="many2many_tags" invisible="is_fixed"/>
+                            <field name="product_uom_qty" invisible="is_fixed" string="Cantidad"/>
+                            <field name="price_unit" widget="monetary" invisible="is_fixed" string="Precio"/>
                         </list>
                     </field>
                 </sheet>
