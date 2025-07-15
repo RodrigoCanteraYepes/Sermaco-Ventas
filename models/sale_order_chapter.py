@@ -913,7 +913,7 @@ class SaleOrderChapterTemplateLine(models.Model):
         if self.line_type == 'alquiler':
             domain.extend([
                 '|', '|', '|',
-                ('name', 'ilike', 'alquiler'),
+                ('name', 'ilike', 'Alquiler'),
                 ('name', 'ilike', 'alqui'),
                 ('categ_id.name', 'ilike', 'alquiler'),
                 ('default_code', 'ilike', 'ALQ')
@@ -921,7 +921,7 @@ class SaleOrderChapterTemplateLine(models.Model):
         elif self.line_type == 'montaje':
             domain.extend([
                 '|', '|', '|', '|',
-                ('name', 'ilike', 'montaje'),
+                ('name', 'ilike', 'Montaje'),
                 ('name', 'ilike', 'instalacion'),
                 ('name', 'ilike', 'instalación'),
                 ('categ_id.name', 'ilike', 'montaje'),
@@ -930,7 +930,7 @@ class SaleOrderChapterTemplateLine(models.Model):
         elif self.line_type == 'portes':
             domain.extend([
                 '|', '|', '|', '|', '|',
-                ('name', 'ilike', 'porte'),
+                ('name', 'ilike', 'Portes'),
                 ('name', 'ilike', 'transporte'),
                 ('name', 'ilike', 'envio'),
                 ('name', 'ilike', 'envío'),
