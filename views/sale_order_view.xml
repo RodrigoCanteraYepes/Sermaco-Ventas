@@ -146,12 +146,21 @@
                             <field name="user_id"/>
                         </group>
                     </group>
+                    <div class="alert alert-info" style="margin: 10px 0;">
+                        <i class="fa fa-info-circle"></i>
+                        <strong>Filtrado Inteligente de Productos:</strong>
+                        Los productos se filtran automáticamente según el tipo de sección seleccionado y el nombre de la plantilla.
+                        Por ejemplo, al seleccionar "Alquiler" solo aparecerán productos relacionados con alquiler.
+                    </div>
                     <field name="template_line_ids">
                         <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
+                            <field name="template_id" invisible="1"/>
                             <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
                             <field name="name" invisible="1"/>
-                            <field name="product_id" invisible="is_fixed"/>
+                            <field name="product_id" invisible="is_fixed" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   placeholder="Selecciona un producto (filtrado por tipo de sección y plantilla)..."/>
                             <field name="product_uom_qty" invisible="is_fixed"/>
                             <field name="product_uom" invisible="is_fixed"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed"/>
