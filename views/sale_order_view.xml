@@ -43,7 +43,7 @@
             
             <!-- Configurar vista tree personalizada para colapso -->
             <xpath expr="//field[@name='order_line']" position="attributes">
-                <attribute name="context">{'tree_view_ref': 'SermacoV1.view_order_line_tree_collapse'}</attribute>
+                <attribute name="context">{'tree_view_ref': 'SermacoV1.view_order_line_list_collapse'}</attribute>
             </xpath>
             
 
@@ -65,13 +65,12 @@
         </field>
     </record>
 
-    <!-- Vista tree personalizada para order_line con funcionalidad de colapso -->
-    <record id="view_order_line_tree_collapse" model="ir.ui.view">
-        <field name="name">sale.order.line.tree.collapse</field>
+    <!-- Vista list personalizada para order_line con funcionalidad de colapso -->
+    <record id="view_order_line_list_collapse" model="ir.ui.view">
+        <field name="name">sale.order.line.list.collapse</field>
         <field name="model">sale.order.line</field>
         <field name="arch" type="xml">
-            <tree editable="bottom" decoration-bf="display_type == 'line_section'" 
-                  decoration-info="display_type == 'line_section' and is_fixed">
+            <list editable="bottom" decoration-bf="display_type == 'line_section'">
                 <field name="display_type" invisible="1"/>
                 <field name="is_fixed" invisible="1"/>
                 <field name="line_type" invisible="1"/>
@@ -79,40 +78,31 @@
                 <field name="section_key" invisible="1"/>
                 <field name="source_chapter_id" invisible="1"/>
                 
-                <!-- Botón de colapso solo para secciones fijas -->
+                <!-- Botón de colapso -->
                 <button name="action_toggle_section_collapse" type="object" 
-                        string="⏵" class="btn-link text-primary" 
-                        invisible="not (display_type == 'line_section' and is_fixed and line_type in ('alquiler', 'montaje'))"
-                        help="Hacer clic para colapsar/expandir esta sección"/>
-                        
-                <!-- Botón de colapso para capítulos -->
-                <button name="action_toggle_chapter_collapse" type="object" 
-                        string="⏵" class="btn-link text-success" 
-                        invisible="not (display_type == 'line_section' and line_type == 'otros' and '🔹' in (name or ''))"
-                        help="Hacer clic para colapsar/expandir este capítulo"/>
+                        string="Toggle" class="btn-link" 
+                        invisible="display_type != 'line_section'"/>
                 
                 <field name="product_id" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"
-                       required="not display_type and not is_fixed"/>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
-                <field name="name" 
-                       invisible="is_section_collapsed and not (display_type == 'line_section')"/>
+                <field name="name"/>
                        
                 <field name="product_uom_qty" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"/>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
                 <field name="product_uom" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"/>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
                 <field name="price_unit" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"/>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
                 <field name="tax_ids" widget="many2many_tags" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"/>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
                 <field name="price_subtotal" 
-                       invisible="display_type in ('line_section', 'line_note') or is_section_collapsed"/>
-            </tree>
+                       invisible="display_type == 'line_section' or is_section_collapsed"/>
+            </list>
         </field>
     </record>
 
