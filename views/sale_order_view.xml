@@ -41,12 +41,7 @@
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-            <!-- Personalizar la vista de líneas del pedido para agregar campos de colapso -->
-            <xpath expr="//field[@name='order_line']" position="after">
-                <!-- Campos necesarios para la funcionalidad de colapso (invisibles) -->
-                <field name="line_type" invisible="1"/>
-                <field name="is_fixed" invisible="1"/>
-            </xpath>
+
             
             <!-- Agregar contenedor para funcionalidad de colapso -->
             <xpath expr="//field[@name='order_line']" position="after">
