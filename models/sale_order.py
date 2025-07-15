@@ -144,8 +144,11 @@ class SaleOrderLine(models.Model):
         for line in self:
             # Solo las secciones de alquiler y montaje son fijas e inmovibles
             if line.is_fixed and line.line_type in ('alquiler', 'montaje') and not self.env.context.get('creating_from_template'):
-                from odoo.exceptions import AccessError
-                raise AccessError(_('Las secciones de alquiler y montaje no se pueden modificar, mover ni cambiar. Solo se pueden editar desde las plantillas de capítulos.'))
+                # Permitir cambios en el estado de colapso
+                allowed_fields = {'is_section_collapsed'}
+                if not allowed_fields.intersection(set(vals.keys())):
+                    from odoo.exceptions import AccessError
+                    raise AccessError(_('Las secciones de alquiler y montaje no se pueden modificar, mover ni cambiar. Solo se pueden editar desde las plantillas de capítulos.'))
         return super().write(vals)
     
     def unlink(self):
