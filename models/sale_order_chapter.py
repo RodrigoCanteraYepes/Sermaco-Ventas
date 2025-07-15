@@ -217,8 +217,15 @@ class SaleOrderChapterLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain=[('sale_ok', '=', True)],
+        domain="_get_product_domain",
         ondelete='set null'
+    )
+    
+    # Campo computed para el dominio dinámico
+    product_domain = fields.Char(
+        string='Dominio de Productos',
+        compute='_compute_product_domain',
+        store=False
     )
     
     name = fields.Char(
@@ -811,6 +818,76 @@ class SaleOrderChapterTemplateLine(models.Model):
     _description = 'Líneas de Plantillas de Capítulos'
     _order = 'template_id, sequence, id'
     
+    @api.depends('line_type')
+    def _compute_product_domain(self):
+        """Calcula el dominio dinámico para productos basado en el tipo de sección"""
+        for record in self:
+            domain = [('sale_ok', '=', True)]
+            
+            if record.line_type == 'alquiler':
+                domain.extend([
+                    '|', '|', '|',
+                    ('name', 'ilike', 'Alquiler'),
+                    ('name', 'ilike', 'alqui'),
+                    ('categ_id.name', 'ilike', 'alquiler'),
+                    ('default_code', 'ilike', 'ALQ')
+                ])
+            elif record.line_type == 'montaje':
+                domain.extend([
+                    '|', '|', '|', '|',
+                    ('name', 'ilike', 'Montaje'),
+                    ('name', 'ilike', 'instalacion'),
+                    ('name', 'ilike', 'instalación'),
+                    ('categ_id.name', 'ilike', 'montaje'),
+                    ('default_code', 'ilike', 'MON')
+                ])
+            elif record.line_type == 'portes':
+                domain.extend([
+                    '|', '|', '|', '|', '|',
+                    ('name', 'ilike', 'Portes'),
+                    ('name', 'ilike', 'transporte'),
+                    ('name', 'ilike', 'envio'),
+                    ('name', 'ilike', 'envío'),
+                    ('categ_id.name', 'ilike', 'transporte'),
+                    ('default_code', 'ilike', 'POR')
+                ])
+            
+            record.product_domain = str(domain)
+    
+    def _get_product_domain(self):
+        """Retorna el dominio para el campo product_id"""
+        domain = [('sale_ok', '=', True)]
+        
+        if self.line_type == 'alquiler':
+            domain.extend([
+                '|', '|', '|',
+                ('name', 'ilike', 'Alquiler'),
+                ('name', 'ilike', 'alqui'),
+                ('categ_id.name', 'ilike', 'alquiler'),
+                ('default_code', 'ilike', 'ALQ')
+            ])
+        elif self.line_type == 'montaje':
+            domain.extend([
+                '|', '|', '|', '|',
+                ('name', 'ilike', 'Montaje'),
+                ('name', 'ilike', 'instalacion'),
+                ('name', 'ilike', 'instalación'),
+                ('categ_id.name', 'ilike', 'montaje'),
+                ('default_code', 'ilike', 'MON')
+            ])
+        elif self.line_type == 'portes':
+            domain.extend([
+                '|', '|', '|', '|', '|',
+                ('name', 'ilike', 'Portes'),
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'envio'),
+                ('name', 'ilike', 'envío'),
+                ('categ_id.name', 'ilike', 'transporte'),
+                ('default_code', 'ilike', 'POR')
+            ])
+        
+        return domain
+    
     template_id = fields.Many2one(
         'sale.order.chapter.template',
         string='Plantilla',
@@ -839,8 +916,15 @@ class SaleOrderChapterTemplateLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain=[('sale_ok', '=', True)],
+        domain="_get_product_domain",
         ondelete='set null'
+    )
+    
+    # Campo computed para el dominio dinámico
+    product_domain = fields.Char(
+        string='Dominio de Productos',
+        compute='_compute_product_domain',
+        store=False
     )
     
     name = fields.Text(
@@ -906,9 +990,44 @@ class SaleOrderChapterTemplateLine(models.Model):
         
         return super().create(vals)
     
-    @api.onchange('line_type')
-    def _onchange_line_type(self):
-        """Filtrar productos basado en el tipo de sección"""
+    @api.depends('line_type')
+    def _compute_product_domain(self):
+        """Calcula el dominio dinámico para productos basado en el tipo de sección"""
+        for record in self:
+            domain = [('sale_ok', '=', True)]
+            
+            if record.line_type == 'alquiler':
+                domain.extend([
+                    '|', '|', '|',
+                    ('name', 'ilike', 'Alquiler'),
+                    ('name', 'ilike', 'alqui'),
+                    ('categ_id.name', 'ilike', 'alquiler'),
+                    ('default_code', 'ilike', 'ALQ')
+                ])
+            elif record.line_type == 'montaje':
+                domain.extend([
+                    '|', '|', '|', '|',
+                    ('name', 'ilike', 'Montaje'),
+                    ('name', 'ilike', 'instalacion'),
+                    ('name', 'ilike', 'instalación'),
+                    ('categ_id.name', 'ilike', 'montaje'),
+                    ('default_code', 'ilike', 'MON')
+                ])
+            elif record.line_type == 'portes':
+                domain.extend([
+                    '|', '|', '|', '|', '|',
+                    ('name', 'ilike', 'Portes'),
+                    ('name', 'ilike', 'transporte'),
+                    ('name', 'ilike', 'envio'),
+                    ('name', 'ilike', 'envío'),
+                    ('categ_id.name', 'ilike', 'transporte'),
+                    ('default_code', 'ilike', 'POR')
+                ])
+            
+            record.product_domain = str(domain)
+    
+    def _get_product_domain(self):
+        """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
         if self.line_type == 'alquiler':
@@ -939,7 +1058,15 @@ class SaleOrderChapterTemplateLine(models.Model):
                 ('default_code', 'ilike', 'POR')
             ])
         
-        return {'domain': {'product_id': domain}}
+        return domain
+    
+    @api.onchange('line_type')
+    def _onchange_line_type(self):
+        """Limpiar producto cuando cambia el tipo de línea"""
+        if self.line_type:
+            self.product_id = False
+            # Forzar recálculo del dominio
+            self._compute_product_domain()
     
     @api.onchange('product_id')
     def _onchange_product_id(self):

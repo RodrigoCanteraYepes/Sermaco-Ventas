@@ -155,12 +155,14 @@
                     <field name="template_line_ids">
                         <list editable="bottom" string="Líneas de la Plantilla" default_group_by="line_type">
                             <field name="template_id" invisible="1"/>
-                            <field name="line_type" string="Tipo de Sección" on_change="1"/>
+                            <field name="product_domain" invisible="1"/>
+                            <field name="line_type" string="Tipo de Sección"/>
                             <field name="is_fixed" string="Línea Fija"/>
                             <field name="name" invisible="1"/>
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
-                                   placeholder="Selecciona un producto (filtrado por tipo de sección y plantilla)..."/>
+                                   placeholder="Selecciona un producto (filtrado por tipo de sección)..."
+                                   context="{'line_type': line_type}"/>
                             <field name="product_uom_qty" invisible="is_fixed"/>
                             <field name="product_uom" invisible="is_fixed"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed"/>
