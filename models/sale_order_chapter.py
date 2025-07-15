@@ -442,6 +442,98 @@ class SaleOrderChapterLine(models.Model):
                 raise AccessError(_('No tienes permisos para modificar líneas de capítulos.'))
         
         return super().write(vals)
+    
+    @api.depends('line_type')
+    def _compute_product_domain(self):
+        """Calcula el dominio dinámico para productos basado en el tipo de sección"""
+        for record in self:
+            domain = [('sale_ok', '=', True)]
+            
+            if record.line_type == 'alquiler':
+                # Buscar por categoría específica o por términos relacionados
+                domain.extend([
+                    '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
+                    ('name', 'ilike', 'Alquiler'),
+                    ('name', 'ilike', 'alqui'),
+                    ('categ_id.name', 'ilike', 'alquiler'),
+                    ('default_code', 'ilike', 'ALQ')
+                ])
+            elif record.line_type == 'montaje':
+                domain.extend([
+                    '|', '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
+                    ('name', 'ilike', 'Montaje'),
+                    ('name', 'ilike', 'instalacion'),
+                    ('name', 'ilike', 'instalación'),
+                    ('categ_id.name', 'ilike', 'montaje'),
+                    ('default_code', 'ilike', 'MON')
+                ])
+            elif record.line_type == 'portes':
+                domain.extend([
+                    '|', '|', '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
+                    ('name', 'ilike', 'Portes'),
+                    ('name', 'ilike', 'transporte'),
+                    ('name', 'ilike', 'envio'),
+                    ('name', 'ilike', 'envío'),
+                    ('categ_id.name', 'ilike', 'transporte'),
+                    ('default_code', 'ilike', 'POR')
+                ])
+            elif record.line_type == 'otros':
+                # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
+                domain.extend([
+                    '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
+                    ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
+                ])
+            
+            record.product_domain = str(domain)
+    
+    def _get_product_domain(self):
+        """Retorna el dominio para el campo product_id"""
+        domain = [('sale_ok', '=', True)]
+        
+        if self.line_type == 'alquiler':
+            # Buscar por categoría específica o por términos relacionados
+            domain.extend([
+                '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
+                ('name', 'ilike', 'Alquiler'),
+                ('name', 'ilike', 'alqui'),
+                ('categ_id.name', 'ilike', 'alquiler'),
+                ('default_code', 'ilike', 'ALQ')
+            ])
+        elif self.line_type == 'montaje':
+            domain.extend([
+                '|', '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
+                ('name', 'ilike', 'Montaje'),
+                ('name', 'ilike', 'instalacion'),
+                ('name', 'ilike', 'instalación'),
+                ('categ_id.name', 'ilike', 'montaje'),
+                ('default_code', 'ilike', 'MON')
+            ])
+        elif self.line_type == 'portes':
+            domain.extend([
+                '|', '|', '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
+                ('name', 'ilike', 'Portes'),
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'envio'),
+                ('name', 'ilike', 'envío'),
+                ('categ_id.name', 'ilike', 'transporte'),
+                ('default_code', 'ilike', 'POR')
+            ])
+        elif self.line_type == 'otros':
+            # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
+            domain.extend([
+                '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
+                ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
+            ])
+        
+        return domain
 
 
 class ChapterTemplateWizard(models.TransientModel):
@@ -929,8 +1021,10 @@ class SaleOrderChapterTemplateLine(models.Model):
             domain = [('sale_ok', '=', True)]
             
             if record.line_type == 'alquiler':
+                # Buscar por categoría específica o por términos relacionados
                 domain.extend([
-                    '|', '|', '|',
+                    '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
                     ('name', 'ilike', 'Alquiler'),
                     ('name', 'ilike', 'alqui'),
                     ('categ_id.name', 'ilike', 'alquiler'),
@@ -938,7 +1032,8 @@ class SaleOrderChapterTemplateLine(models.Model):
                 ])
             elif record.line_type == 'montaje':
                 domain.extend([
-                    '|', '|', '|', '|',
+                    '|', '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
                     ('name', 'ilike', 'Montaje'),
                     ('name', 'ilike', 'instalacion'),
                     ('name', 'ilike', 'instalación'),
@@ -947,13 +1042,21 @@ class SaleOrderChapterTemplateLine(models.Model):
                 ])
             elif record.line_type == 'portes':
                 domain.extend([
-                    '|', '|', '|', '|', '|',
+                    '|', '|', '|', '|', '|', '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
                     ('name', 'ilike', 'Portes'),
                     ('name', 'ilike', 'transporte'),
                     ('name', 'ilike', 'envio'),
                     ('name', 'ilike', 'envío'),
                     ('categ_id.name', 'ilike', 'transporte'),
                     ('default_code', 'ilike', 'POR')
+                ])
+            elif record.line_type == 'otros':
+                # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
+                domain.extend([
+                    '|',
+                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
+                    ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
                 ])
             
             record.product_domain = str(domain)
@@ -963,8 +1066,10 @@ class SaleOrderChapterTemplateLine(models.Model):
         domain = [('sale_ok', '=', True)]
         
         if self.line_type == 'alquiler':
+            # Buscar por categoría específica o por términos relacionados
             domain.extend([
-                '|', '|', '|',
+                '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
                 ('name', 'ilike', 'Alquiler'),
                 ('name', 'ilike', 'alqui'),
                 ('categ_id.name', 'ilike', 'alquiler'),
@@ -972,7 +1077,8 @@ class SaleOrderChapterTemplateLine(models.Model):
             ])
         elif self.line_type == 'montaje':
             domain.extend([
-                '|', '|', '|', '|',
+                '|', '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
                 ('name', 'ilike', 'Montaje'),
                 ('name', 'ilike', 'instalacion'),
                 ('name', 'ilike', 'instalación'),
@@ -981,13 +1087,21 @@ class SaleOrderChapterTemplateLine(models.Model):
             ])
         elif self.line_type == 'portes':
             domain.extend([
-                '|', '|', '|', '|', '|',
+                '|', '|', '|', '|', '|', '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
                 ('name', 'ilike', 'Portes'),
                 ('name', 'ilike', 'transporte'),
                 ('name', 'ilike', 'envio'),
                 ('name', 'ilike', 'envío'),
                 ('categ_id.name', 'ilike', 'transporte'),
                 ('default_code', 'ilike', 'POR')
+            ])
+        elif self.line_type == 'otros':
+            # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
+            domain.extend([
+                '|',
+                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
+                ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
             ])
         
         return domain

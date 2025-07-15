@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Categorías de producto específicas para cada tipo de sección -->
+    
+    <!-- Categoría principal para productos de capítulos -->
+    <record id="product_category_chapters" model="product.category">
+        <field name="name">Productos de Capítulos</field>
+        <field name="parent_id" ref="product.product_category_all"/>
+    </record>
+    
+    <!-- Categoría para productos de alquiler -->
+    <record id="product_category_alquiler" model="product.category">
+        <field name="name">Alquiler</field>
+        <field name="parent_id" ref="product_category_chapters"/>
+    </record>
+    
+    <!-- Categoría para productos de montaje -->
+    <record id="product_category_montaje" model="product.category">
+        <field name="name">Montaje</field>
+        <field name="parent_id" ref="product_category_chapters"/>
+    </record>
+    
+    <!-- Categoría para productos de transporte/portes -->
+    <record id="product_category_transporte" model="product.category">
+        <field name="name">Transporte</field>
+        <field name="parent_id" ref="product_category_chapters"/>
+    </record>
+    
+    <!-- Categoría para otros conceptos -->
+    <record id="product_category_otros" model="product.category">
+        <field name="name">Otros Conceptos</field>
+        <field name="parent_id" ref="product_category_chapters"/>
+    </record>
+    
     <!-- Datos básicos para asegurar la carga correcta de los modelos -->
     
     <!-- Registro de modelo sale.order.chapter -->
