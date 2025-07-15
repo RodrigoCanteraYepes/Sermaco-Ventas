@@ -97,7 +97,7 @@
                 <field name="price_unit" 
                        invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
-                <field name="tax_ids" widget="many2many_tags" 
+                <field name="tax_id" widget="many2many_tags" 
                        invisible="display_type == 'line_section' or is_section_collapsed"/>
                        
                 <field name="price_subtotal" 
