@@ -845,7 +845,8 @@ class SaleOrderChapterTemplateLine(models.Model):
     
     name = fields.Text(
         string='Descripción',
-        required=True
+        required=False,
+        default='Línea de plantilla'
     )
     
     product_uom_qty = fields.Float(
