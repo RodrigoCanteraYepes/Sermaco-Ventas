@@ -55,6 +55,12 @@ class SaleOrderLine(models.Model):
         help='Determina si la línea debe ser visible según el estado de colapso de su sección'
     )
     
+    is_section_collapsed = fields.Boolean(
+        string='Sección Colapsada',
+        compute='_compute_section_collapsed',
+        help='Indica si esta línea pertenece a una sección colapsada'
+    )
+    
     # Redefinir product_id para permitir borrar productos
     product_id = fields.Many2one(
         'product.product',
@@ -93,10 +99,39 @@ class SaleOrderLine(models.Model):
             # Las líneas de productos dependen del estado de su sección padre
             elif not line.is_fixed and line.line_type:
                 collapsed_sections = json.loads(line.order_id.collapsed_sections or '{}')
-                section_key = f"{line.line_type}_{line.line_type.title()}"
-                line.is_line_visible = section_key not in collapsed_sections
+                # Buscar la sección padre correspondiente
+                parent_section = line.order_id.order_line.filtered(
+                    lambda l: l.display_type == 'line_section' and l.is_fixed and l.line_type == line.line_type
+                )
+                if parent_section and parent_section.section_key in collapsed_sections:
+                    line.is_line_visible = False
+                else:
+                    line.is_line_visible = True
             else:
                 line.is_line_visible = True
+    
+    @api.depends('line_type', 'display_type', 'is_fixed', 'order_id.collapsed_sections')
+    def _compute_section_collapsed(self):
+        """Calcula si esta línea pertenece a una sección colapsada"""
+        import json
+        
+        for line in self:
+            if line.display_type == 'line_section' and line.is_fixed:
+                # Para secciones, verificar si están colapsadas
+                collapsed_sections = json.loads(line.order_id.collapsed_sections or '{}')
+                line.is_section_collapsed = line.section_key in collapsed_sections
+            elif not line.is_fixed and line.line_type:
+                # Para líneas de productos, verificar si su sección padre está colapsada
+                collapsed_sections = json.loads(line.order_id.collapsed_sections or '{}')
+                parent_section = line.order_id.order_line.filtered(
+                    lambda l: l.display_type == 'line_section' and l.is_fixed and l.line_type == line.line_type
+                )
+                if parent_section:
+                    line.is_section_collapsed = parent_section.section_key in collapsed_sections
+                else:
+                    line.is_section_collapsed = False
+            else:
+                line.is_section_collapsed = False
     
     def action_toggle_section_collapse(self):
         """Alterna el estado de colapso de una sección"""
@@ -113,22 +148,13 @@ class SaleOrderLine(models.Model):
         section_key = self.section_key
         if section_key in collapsed_sections:
             del collapsed_sections[section_key]
-            collapsed = False
         else:
             collapsed_sections[section_key] = True
-            collapsed = True
         
         # Guardar el nuevo estado
         self.order_id.collapsed_sections = json.dumps(collapsed_sections)
         
-        # Actualizar el campo is_section_collapsed para todas las líneas de esta sección
-        section_lines = self.order_id.order_line.filtered(
-            lambda l: l.line_type == self.line_type
-        )
-        
-        for line in section_lines:
-            line.is_section_collapsed = collapsed
-        
+        # Los campos computados se actualizarán automáticamente
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',
@@ -151,22 +177,13 @@ class SaleOrderLine(models.Model):
         # Alternar el estado del capítulo
         if chapter_key in collapsed_sections:
             del collapsed_sections[chapter_key]
-            collapsed = False
         else:
             collapsed_sections[chapter_key] = True
-            collapsed = True
         
         # Guardar el nuevo estado
         self.order_id.collapsed_sections = json.dumps(collapsed_sections)
         
-        # Actualizar todas las líneas del mismo capítulo
-        chapter_lines = self.order_id.order_line.filtered(
-            lambda l: l.source_chapter_id == self.source_chapter_id
-        )
-        
-        for line in chapter_lines:
-            line.is_section_collapsed = collapsed
-        
+        # Los campos computados se actualizarán automáticamente
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',
@@ -240,12 +257,6 @@ class SaleOrder(models.Model):
         string='Secciones Colapsadas',
         default='{}',
         help='JSON que almacena qué secciones están colapsadas por tipo'
-    )
-    
-    is_section_collapsed = fields.Boolean(
-        string='Sección Colapsada (Auxiliar)',
-        default=False,
-        help='Campo auxiliar para la vista - no se usa directamente'
     )
     
     @api.depends('chapter_ids.total_amount')
@@ -387,14 +398,7 @@ class SaleOrder(models.Model):
         # Guardar el nuevo estado
         self.collapsed_sections = json.dumps(collapsed_sections)
         
-        # Actualizar todas las líneas
-        for line in self.order_line:
-            if line.display_type == 'line_section' and line.is_fixed:
-                line.is_section_collapsed = line.section_key in collapsed_sections
-            elif not line.is_fixed and line.line_type:
-                # Buscar si la sección padre está colapsada
-                section_key = f"{line.line_type}_{line.line_type.title()}"
-                line.is_section_collapsed = section_key in collapsed_sections
+        # Los campos computados se actualizarán automáticamente
         
         return {
             'type': 'ir.actions.client',
