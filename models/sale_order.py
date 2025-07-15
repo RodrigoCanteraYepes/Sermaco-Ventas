@@ -101,7 +101,7 @@ class SaleOrderLine(models.Model):
     def action_toggle_section_collapse(self):
         """Alterna el estado de colapso de una sección"""
         self.ensure_one()
-        if not (self.display_type == 'line_section' and self.is_fixed and self.line_type in ('alquiler', 'montaje')):
+        if not (self.display_type == 'line_section' and self.is_fixed):
             return
         
         import json
@@ -114,32 +114,20 @@ class SaleOrderLine(models.Model):
         if section_key in collapsed_sections:
             del collapsed_sections[section_key]
             collapsed = False
-            new_icon = '▼'  # Icono expandido
         else:
             collapsed_sections[section_key] = True
             collapsed = True
-            new_icon = '▶'  # Icono colapsado
         
         # Guardar el nuevo estado
         self.order_id.collapsed_sections = json.dumps(collapsed_sections)
         
         # Actualizar el campo is_section_collapsed para todas las líneas de esta sección
         section_lines = self.order_id.order_line.filtered(
-            lambda l: l.line_type == self.line_type and 
-                     (l.display_type == 'line_section' or not l.is_fixed)
+            lambda l: l.line_type == self.line_type
         )
         
         for line in section_lines:
-            if line.display_type == 'line_section' and line.is_fixed:
-                line.is_section_collapsed = collapsed
-                # Actualizar el nombre de la sección con el nuevo icono
-                if line.name:
-                    # Remover iconos existentes y agregar el nuevo
-                    clean_name = line.name.replace('▼', '').replace('▶', '').strip()
-                    line.name = f"{new_icon} {clean_name}"
-            elif not line.is_fixed and line.line_type == self.line_type:
-                # Ocultar/mostrar líneas de productos de esta sección
-                line.is_section_collapsed = collapsed
+            line.is_section_collapsed = collapsed
         
         return {
             'type': 'ir.actions.client',
@@ -149,7 +137,7 @@ class SaleOrderLine(models.Model):
     def action_toggle_chapter_collapse(self):
         """Alterna el estado de colapso de un capítulo completo"""
         self.ensure_one()
-        if not (self.display_type == 'line_section' and self.line_type == 'otros' and '🔹' in (self.name or '')):
+        if not (self.display_type == 'line_section' and self.line_type == 'otros'):
             return
         
         import json
