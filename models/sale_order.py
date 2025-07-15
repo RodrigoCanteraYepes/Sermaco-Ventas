@@ -43,6 +43,18 @@ class SaleOrderLine(models.Model):
         help='Clave única para identificar la sección'
     )
     
+    collapse_icon = fields.Char(
+        string='Icono de Colapso',
+        compute='_compute_collapse_icon',
+        help='Icono que indica el estado de colapso de la sección'
+    )
+    
+    is_line_visible = fields.Boolean(
+        string='Línea Visible',
+        compute='_compute_line_visibility',
+        help='Determina si la línea debe ser visible según el estado de colapso de su sección'
+    )
+    
     # Redefinir product_id para permitir borrar productos
     product_id = fields.Many2one(
         'product.product',
@@ -60,6 +72,32 @@ class SaleOrderLine(models.Model):
             else:
                 line.section_key = False
     
+    @api.depends('is_section_collapsed', 'display_type', 'is_fixed')
+    def _compute_collapse_icon(self):
+        """Calcula el icono de colapso según el estado de la sección"""
+        for line in self:
+            if line.display_type == 'line_section' and line.is_fixed:
+                line.collapse_icon = '▶' if line.is_section_collapsed else '▼'
+            else:
+                line.collapse_icon = False
+    
+    @api.depends('line_type', 'display_type', 'is_fixed', 'order_id.collapsed_sections')
+    def _compute_line_visibility(self):
+        """Calcula si la línea debe ser visible según el estado de colapso de su sección"""
+        import json
+        
+        for line in self:
+            # Las secciones fijas siempre son visibles
+            if line.display_type == 'line_section' and line.is_fixed:
+                line.is_line_visible = True
+            # Las líneas de productos dependen del estado de su sección padre
+            elif not line.is_fixed and line.line_type:
+                collapsed_sections = json.loads(line.order_id.collapsed_sections or '{}')
+                section_key = f"{line.line_type}_{line.line_type.title()}"
+                line.is_line_visible = section_key not in collapsed_sections
+            else:
+                line.is_line_visible = True
+    
     def action_toggle_section_collapse(self):
         """Alterna el estado de colapso de una sección"""
         self.ensure_one()
@@ -76,9 +114,11 @@ class SaleOrderLine(models.Model):
         if section_key in collapsed_sections:
             del collapsed_sections[section_key]
             collapsed = False
+            new_icon = '▼'  # Icono expandido
         else:
             collapsed_sections[section_key] = True
             collapsed = True
+            new_icon = '▶'  # Icono colapsado
         
         # Guardar el nuevo estado
         self.order_id.collapsed_sections = json.dumps(collapsed_sections)
@@ -92,6 +132,11 @@ class SaleOrderLine(models.Model):
         for line in section_lines:
             if line.display_type == 'line_section' and line.is_fixed:
                 line.is_section_collapsed = collapsed
+                # Actualizar el nombre de la sección con el nuevo icono
+                if line.name:
+                    # Remover iconos existentes y agregar el nuevo
+                    clean_name = line.name.replace('▼', '').replace('▶', '').strip()
+                    line.name = f"{new_icon} {clean_name}"
             elif not line.is_fixed and line.line_type == self.line_type:
                 # Ocultar/mostrar líneas de productos de esta sección
                 line.is_section_collapsed = collapsed
@@ -402,13 +447,3 @@ class SaleOrder(models.Model):
             },
             'domain': [('active', '=', True)]
         }
-    
-    def action_toggle_all_sections(self):
-        """Expandir o contraer todas las secciones de capítulos"""
-        section_lines = self.order_line.filtered(lambda l: l.display_type == 'line_section')
-        if section_lines:
-            # Alternar el estado de colapso de todas las secciones
-            current_state = section_lines[0].is_section_collapsed if section_lines else False
-            new_state = not current_state
-            section_lines.write({'is_section_collapsed': new_state})
-        return True
