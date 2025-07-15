@@ -818,75 +818,7 @@ class SaleOrderChapterTemplateLine(models.Model):
     _description = 'Líneas de Plantillas de Capítulos'
     _order = 'template_id, sequence, id'
     
-    @api.depends('line_type')
-    def _compute_product_domain(self):
-        """Calcula el dominio dinámico para productos basado en el tipo de sección"""
-        for record in self:
-            domain = [('sale_ok', '=', True)]
-            
-            if record.line_type == 'alquiler':
-                domain.extend([
-                    '|', '|', '|',
-                    ('name', 'ilike', 'Alquiler'),
-                    ('name', 'ilike', 'alqui'),
-                    ('categ_id.name', 'ilike', 'alquiler'),
-                    ('default_code', 'ilike', 'ALQ')
-                ])
-            elif record.line_type == 'montaje':
-                domain.extend([
-                    '|', '|', '|', '|',
-                    ('name', 'ilike', 'Montaje'),
-                    ('name', 'ilike', 'instalacion'),
-                    ('name', 'ilike', 'instalación'),
-                    ('categ_id.name', 'ilike', 'montaje'),
-                    ('default_code', 'ilike', 'MON')
-                ])
-            elif record.line_type == 'portes':
-                domain.extend([
-                    '|', '|', '|', '|', '|',
-                    ('name', 'ilike', 'Portes'),
-                    ('name', 'ilike', 'transporte'),
-                    ('name', 'ilike', 'envio'),
-                    ('name', 'ilike', 'envío'),
-                    ('categ_id.name', 'ilike', 'transporte'),
-                    ('default_code', 'ilike', 'POR')
-                ])
-            
-            record.product_domain = str(domain)
-    
-    def _get_product_domain(self):
-        """Retorna el dominio para el campo product_id"""
-        domain = [('sale_ok', '=', True)]
-        
-        if self.line_type == 'alquiler':
-            domain.extend([
-                '|', '|', '|',
-                ('name', 'ilike', 'Alquiler'),
-                ('name', 'ilike', 'alqui'),
-                ('categ_id.name', 'ilike', 'alquiler'),
-                ('default_code', 'ilike', 'ALQ')
-            ])
-        elif self.line_type == 'montaje':
-            domain.extend([
-                '|', '|', '|', '|',
-                ('name', 'ilike', 'Montaje'),
-                ('name', 'ilike', 'instalacion'),
-                ('name', 'ilike', 'instalación'),
-                ('categ_id.name', 'ilike', 'montaje'),
-                ('default_code', 'ilike', 'MON')
-            ])
-        elif self.line_type == 'portes':
-            domain.extend([
-                '|', '|', '|', '|', '|',
-                ('name', 'ilike', 'Portes'),
-                ('name', 'ilike', 'transporte'),
-                ('name', 'ilike', 'envio'),
-                ('name', 'ilike', 'envío'),
-                ('categ_id.name', 'ilike', 'transporte'),
-                ('default_code', 'ilike', 'POR')
-            ])
-        
-        return domain
+
     
     template_id = fields.Many2one(
         'sale.order.chapter.template',

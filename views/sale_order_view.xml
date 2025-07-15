@@ -162,7 +162,8 @@
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
                                    placeholder="Selecciona un producto (filtrado por tipo de sección)..."
-                                   context="{'line_type': line_type}"/>
+                                   context="{'line_type': line_type}"
+                                   domain="product_domain"/>
                             <field name="product_uom_qty" invisible="is_fixed"/>
                             <field name="product_uom" invisible="is_fixed"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed"/>
