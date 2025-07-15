@@ -41,24 +41,9 @@
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True}</attribute>
             </xpath>
             
-            <!-- Personalizar la vista tree de order_line para agregar funcionalidad de colapso -->
-            <xpath expr="//field[@name='order_line']//tree" position="attributes">
-                <attribute name="decoration-bf">display_type == 'line_section'</attribute>
-                <attribute name="decoration-info">display_type == 'line_section' and is_fixed</attribute>
-            </xpath>
-            
-            <!-- Agregar campos necesarios para la funcionalidad de colapso en la vista tree -->
-            <xpath expr="//field[@name='order_line']//tree//field[@name='name']" position="before">
-                <field name="collapse_icon" widget="html" optional="hide" 
-                       invisible="not (display_type == 'line_section' and is_fixed)"/>
-            </xpath>
-            
-            <xpath expr="//field[@name='order_line']//tree" position="inside">
-                <field name="line_type" invisible="1"/>
-                <field name="is_fixed" invisible="1"/>
-                <field name="section_key" invisible="1"/>
-                <field name="is_section_collapsed" invisible="1"/>
-                <field name="is_line_visible" invisible="1"/>
+            <!-- Agregar campos necesarios para la funcionalidad de colapso -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="widget">section_and_note_one2many</attribute>
             </xpath>
             
 
