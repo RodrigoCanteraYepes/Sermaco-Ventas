@@ -451,42 +451,112 @@ class SaleOrderChapterLine(models.Model):
             
             if record.line_type == 'alquiler':
                 # Buscar por categoría específica o por términos relacionados
-                domain.extend([
-                    '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
-                    ('name', 'ilike', 'Alquiler'),
-                    ('name', 'ilike', 'alqui'),
-                    ('categ_id.name', 'ilike', 'alquiler'),
-                    ('default_code', 'ilike', 'ALQ')
-                ])
+                try:
+                    alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
+                    if alquiler_cat:
+                        domain.extend([
+                            '|', '|', '|', '|',
+                            ('categ_id', 'child_of', alquiler_cat.id),
+                            ('name', 'ilike', 'Alquiler'),
+                            ('name', 'ilike', 'alqui'),
+                            ('categ_id.name', 'ilike', 'alquiler'),
+                            ('default_code', 'ilike', 'ALQ')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|',
+                            ('name', 'ilike', 'Alquiler'),
+                            ('name', 'ilike', 'alqui'),
+                            ('categ_id.name', 'ilike', 'alquiler'),
+                            ('default_code', 'ilike', 'ALQ')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|',
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
             elif record.line_type == 'montaje':
-                domain.extend([
-                    '|', '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
-                    ('name', 'ilike', 'Montaje'),
-                    ('name', 'ilike', 'instalacion'),
-                    ('name', 'ilike', 'instalación'),
-                    ('categ_id.name', 'ilike', 'montaje'),
-                    ('default_code', 'ilike', 'MON')
-                ])
+                try:
+                    montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
+                    if montaje_cat:
+                        domain.extend([
+                            '|', '|', '|', '|', '|',
+                            ('categ_id', 'child_of', montaje_cat.id),
+                            ('name', 'ilike', 'Montaje'),
+                            ('name', 'ilike', 'instalacion'),
+                            ('name', 'ilike', 'instalación'),
+                            ('categ_id.name', 'ilike', 'montaje'),
+                            ('default_code', 'ilike', 'MON')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|', '|',
+                            ('name', 'ilike', 'Montaje'),
+                            ('name', 'ilike', 'instalacion'),
+                            ('name', 'ilike', 'instalación'),
+                            ('categ_id.name', 'ilike', 'montaje'),
+                            ('default_code', 'ilike', 'MON')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
             elif record.line_type == 'portes':
-                domain.extend([
-                    '|', '|', '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
-                    ('name', 'ilike', 'Portes'),
-                    ('name', 'ilike', 'transporte'),
-                    ('name', 'ilike', 'envio'),
-                    ('name', 'ilike', 'envío'),
-                    ('categ_id.name', 'ilike', 'transporte'),
-                    ('default_code', 'ilike', 'POR')
-                ])
+                try:
+                    transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
+                    if transporte_cat:
+                        domain.extend([
+                            '|', '|', '|', '|', '|', '|',
+                            ('categ_id', 'child_of', transporte_cat.id),
+                            ('name', 'ilike', 'Portes'),
+                            ('name', 'ilike', 'transporte'),
+                            ('name', 'ilike', 'envio'),
+                            ('name', 'ilike', 'envío'),
+                            ('categ_id.name', 'ilike', 'transporte'),
+                            ('default_code', 'ilike', 'POR')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|', '|', '|',
+                            ('name', 'ilike', 'Portes'),
+                            ('name', 'ilike', 'transporte'),
+                            ('name', 'ilike', 'envio'),
+                            ('name', 'ilike', 'envío'),
+                            ('categ_id.name', 'ilike', 'transporte'),
+                            ('default_code', 'ilike', 'POR')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
             elif record.line_type == 'otros':
-                # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
-                domain.extend([
-                    '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
-                    ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
-                ])
+                # Para otros conceptos, usar filtrado básico si las categorías no existen
+                try:
+                    otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
+                    chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
+                    if otros_cat and chapters_cat:
+                        domain.extend([
+                            '|',
+                            ('categ_id', 'child_of', otros_cat.id),
+                            ('categ_id', 'not child_of', chapters_cat.id)
+                        ])
+                except:
+                    # Si no existen las categorías, no agregar filtros adicionales
+                    pass
             
             record.product_domain = str(domain)
     
@@ -496,42 +566,112 @@ class SaleOrderChapterLine(models.Model):
         
         if self.line_type == 'alquiler':
             # Buscar por categoría específica o por términos relacionados
-            domain.extend([
-                '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
-                ('name', 'ilike', 'Alquiler'),
-                ('name', 'ilike', 'alqui'),
-                ('categ_id.name', 'ilike', 'alquiler'),
-                ('default_code', 'ilike', 'ALQ')
-            ])
+            try:
+                alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
+                if alquiler_cat:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('categ_id', 'child_of', alquiler_cat.id),
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|',
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|',
+                    ('name', 'ilike', 'Alquiler'),
+                    ('name', 'ilike', 'alqui'),
+                    ('categ_id.name', 'ilike', 'alquiler'),
+                    ('default_code', 'ilike', 'ALQ')
+                ])
         elif self.line_type == 'montaje':
-            domain.extend([
-                '|', '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
-                ('name', 'ilike', 'Montaje'),
-                ('name', 'ilike', 'instalacion'),
-                ('name', 'ilike', 'instalación'),
-                ('categ_id.name', 'ilike', 'montaje'),
-                ('default_code', 'ilike', 'MON')
-            ])
+            try:
+                montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
+                if montaje_cat:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('categ_id', 'child_of', montaje_cat.id),
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|', '|',
+                    ('name', 'ilike', 'Montaje'),
+                    ('name', 'ilike', 'instalacion'),
+                    ('name', 'ilike', 'instalación'),
+                    ('categ_id.name', 'ilike', 'montaje'),
+                    ('default_code', 'ilike', 'MON')
+                ])
         elif self.line_type == 'portes':
-            domain.extend([
-                '|', '|', '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
-                ('name', 'ilike', 'Portes'),
-                ('name', 'ilike', 'transporte'),
-                ('name', 'ilike', 'envio'),
-                ('name', 'ilike', 'envío'),
-                ('categ_id.name', 'ilike', 'transporte'),
-                ('default_code', 'ilike', 'POR')
-            ])
+            try:
+                transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
+                if transporte_cat:
+                    domain.extend([
+                        '|', '|', '|', '|', '|', '|',
+                        ('categ_id', 'child_of', transporte_cat.id),
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|', '|', '|',
+                    ('name', 'ilike', 'Portes'),
+                    ('name', 'ilike', 'transporte'),
+                    ('name', 'ilike', 'envio'),
+                    ('name', 'ilike', 'envío'),
+                    ('categ_id.name', 'ilike', 'transporte'),
+                    ('default_code', 'ilike', 'POR')
+                ])
         elif self.line_type == 'otros':
-            # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
-            domain.extend([
-                '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
-                ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
-            ])
+            # Para otros conceptos, usar filtrado básico si las categorías no existen
+            try:
+                otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
+                chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
+                if otros_cat and chapters_cat:
+                    domain.extend([
+                        '|',
+                        ('categ_id', 'child_of', otros_cat.id),
+                        ('categ_id', 'not child_of', chapters_cat.id)
+                    ])
+            except:
+                # Si no existen las categorías, no agregar filtros adicionales
+                pass
         
         return domain
 
@@ -1022,42 +1162,112 @@ class SaleOrderChapterTemplateLine(models.Model):
             
             if record.line_type == 'alquiler':
                 # Buscar por categoría específica o por términos relacionados
-                domain.extend([
-                    '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
-                    ('name', 'ilike', 'Alquiler'),
-                    ('name', 'ilike', 'alqui'),
-                    ('categ_id.name', 'ilike', 'alquiler'),
-                    ('default_code', 'ilike', 'ALQ')
-                ])
+                try:
+                    alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
+                    if alquiler_cat:
+                        domain.extend([
+                            '|', '|', '|', '|',
+                            ('categ_id', 'child_of', alquiler_cat.id),
+                            ('name', 'ilike', 'Alquiler'),
+                            ('name', 'ilike', 'alqui'),
+                            ('categ_id.name', 'ilike', 'alquiler'),
+                            ('default_code', 'ilike', 'ALQ')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|',
+                            ('name', 'ilike', 'Alquiler'),
+                            ('name', 'ilike', 'alqui'),
+                            ('categ_id.name', 'ilike', 'alquiler'),
+                            ('default_code', 'ilike', 'ALQ')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|',
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
             elif record.line_type == 'montaje':
-                domain.extend([
-                    '|', '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
-                    ('name', 'ilike', 'Montaje'),
-                    ('name', 'ilike', 'instalacion'),
-                    ('name', 'ilike', 'instalación'),
-                    ('categ_id.name', 'ilike', 'montaje'),
-                    ('default_code', 'ilike', 'MON')
-                ])
+                try:
+                    montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
+                    if montaje_cat:
+                        domain.extend([
+                            '|', '|', '|', '|', '|',
+                            ('categ_id', 'child_of', montaje_cat.id),
+                            ('name', 'ilike', 'Montaje'),
+                            ('name', 'ilike', 'instalacion'),
+                            ('name', 'ilike', 'instalación'),
+                            ('categ_id.name', 'ilike', 'montaje'),
+                            ('default_code', 'ilike', 'MON')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|', '|',
+                            ('name', 'ilike', 'Montaje'),
+                            ('name', 'ilike', 'instalacion'),
+                            ('name', 'ilike', 'instalación'),
+                            ('categ_id.name', 'ilike', 'montaje'),
+                            ('default_code', 'ilike', 'MON')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
             elif record.line_type == 'portes':
-                domain.extend([
-                    '|', '|', '|', '|', '|', '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
-                    ('name', 'ilike', 'Portes'),
-                    ('name', 'ilike', 'transporte'),
-                    ('name', 'ilike', 'envio'),
-                    ('name', 'ilike', 'envío'),
-                    ('categ_id.name', 'ilike', 'transporte'),
-                    ('default_code', 'ilike', 'POR')
-                ])
+                try:
+                    transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
+                    if transporte_cat:
+                        domain.extend([
+                            '|', '|', '|', '|', '|', '|',
+                            ('categ_id', 'child_of', transporte_cat.id),
+                            ('name', 'ilike', 'Portes'),
+                            ('name', 'ilike', 'transporte'),
+                            ('name', 'ilike', 'envio'),
+                            ('name', 'ilike', 'envío'),
+                            ('categ_id.name', 'ilike', 'transporte'),
+                            ('default_code', 'ilike', 'POR')
+                        ])
+                    else:
+                        domain.extend([
+                            '|', '|', '|', '|', '|',
+                            ('name', 'ilike', 'Portes'),
+                            ('name', 'ilike', 'transporte'),
+                            ('name', 'ilike', 'envio'),
+                            ('name', 'ilike', 'envío'),
+                            ('categ_id.name', 'ilike', 'transporte'),
+                            ('default_code', 'ilike', 'POR')
+                        ])
+                except:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
             elif record.line_type == 'otros':
-                # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
-                domain.extend([
-                    '|',
-                    ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
-                    ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
-                ])
+                # Para otros conceptos, usar filtrado básico si las categorías no existen
+                try:
+                    otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
+                    chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
+                    if otros_cat and chapters_cat:
+                        domain.extend([
+                            '|',
+                            ('categ_id', 'child_of', otros_cat.id),
+                            ('categ_id', 'not child_of', chapters_cat.id)
+                        ])
+                except:
+                    # Si no existen las categorías, no agregar filtros adicionales
+                    pass
             
             record.product_domain = str(domain)
     
@@ -1067,42 +1277,112 @@ class SaleOrderChapterTemplateLine(models.Model):
         
         if self.line_type == 'alquiler':
             # Buscar por categoría específica o por términos relacionados
-            domain.extend([
-                '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_alquiler').id),
-                ('name', 'ilike', 'Alquiler'),
-                ('name', 'ilike', 'alqui'),
-                ('categ_id.name', 'ilike', 'alquiler'),
-                ('default_code', 'ilike', 'ALQ')
-            ])
+            try:
+                alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
+                if alquiler_cat:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('categ_id', 'child_of', alquiler_cat.id),
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|',
+                        ('name', 'ilike', 'Alquiler'),
+                        ('name', 'ilike', 'alqui'),
+                        ('categ_id.name', 'ilike', 'alquiler'),
+                        ('default_code', 'ilike', 'ALQ')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|',
+                    ('name', 'ilike', 'Alquiler'),
+                    ('name', 'ilike', 'alqui'),
+                    ('categ_id.name', 'ilike', 'alquiler'),
+                    ('default_code', 'ilike', 'ALQ')
+                ])
         elif self.line_type == 'montaje':
-            domain.extend([
-                '|', '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_montaje').id),
-                ('name', 'ilike', 'Montaje'),
-                ('name', 'ilike', 'instalacion'),
-                ('name', 'ilike', 'instalación'),
-                ('categ_id.name', 'ilike', 'montaje'),
-                ('default_code', 'ilike', 'MON')
-            ])
+            try:
+                montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
+                if montaje_cat:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('categ_id', 'child_of', montaje_cat.id),
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|', '|',
+                        ('name', 'ilike', 'Montaje'),
+                        ('name', 'ilike', 'instalacion'),
+                        ('name', 'ilike', 'instalación'),
+                        ('categ_id.name', 'ilike', 'montaje'),
+                        ('default_code', 'ilike', 'MON')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|', '|',
+                    ('name', 'ilike', 'Montaje'),
+                    ('name', 'ilike', 'instalacion'),
+                    ('name', 'ilike', 'instalación'),
+                    ('categ_id.name', 'ilike', 'montaje'),
+                    ('default_code', 'ilike', 'MON')
+                ])
         elif self.line_type == 'portes':
-            domain.extend([
-                '|', '|', '|', '|', '|', '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_transporte').id),
-                ('name', 'ilike', 'Portes'),
-                ('name', 'ilike', 'transporte'),
-                ('name', 'ilike', 'envio'),
-                ('name', 'ilike', 'envío'),
-                ('categ_id.name', 'ilike', 'transporte'),
-                ('default_code', 'ilike', 'POR')
-            ])
+            try:
+                transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
+                if transporte_cat:
+                    domain.extend([
+                        '|', '|', '|', '|', '|', '|',
+                        ('categ_id', 'child_of', transporte_cat.id),
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
+                else:
+                    domain.extend([
+                        '|', '|', '|', '|', '|',
+                        ('name', 'ilike', 'Portes'),
+                        ('name', 'ilike', 'transporte'),
+                        ('name', 'ilike', 'envio'),
+                        ('name', 'ilike', 'envío'),
+                        ('categ_id.name', 'ilike', 'transporte'),
+                        ('default_code', 'ilike', 'POR')
+                    ])
+            except:
+                domain.extend([
+                    '|', '|', '|', '|', '|',
+                    ('name', 'ilike', 'Portes'),
+                    ('name', 'ilike', 'transporte'),
+                    ('name', 'ilike', 'envio'),
+                    ('name', 'ilike', 'envío'),
+                    ('categ_id.name', 'ilike', 'transporte'),
+                    ('default_code', 'ilike', 'POR')
+                ])
         elif self.line_type == 'otros':
-            # Para otros conceptos, incluir la categoría específica o productos sin categoría específica
-            domain.extend([
-                '|',
-                ('categ_id', 'child_of', self.env.ref('sermaco_sale_order_chapters.product_category_otros').id),
-                ('categ_id', 'not child_of', self.env.ref('sermaco_sale_order_chapters.product_category_chapters').id)
-            ])
+            # Para otros conceptos, usar filtrado básico si las categorías no existen
+            try:
+                otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
+                chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
+                if otros_cat and chapters_cat:
+                    domain.extend([
+                        '|',
+                        ('categ_id', 'child_of', otros_cat.id),
+                        ('categ_id', 'not child_of', chapters_cat.id)
+                    ])
+            except:
+                # Si no existen las categorías, no agregar filtros adicionales
+                pass
         
         return domain
     
