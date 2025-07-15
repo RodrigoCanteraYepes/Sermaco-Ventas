@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Las vistas de diálogo han sido eliminadas - funcionalidad integrada en el tab principal -->
-
-    <!-- Las vistas de formulario para modelos personalizados se generan automáticamente -->
-
     <!-- Herencia de la vista de formulario de Sale Order -->
     <record id="view_order_form_inherit_chapters" model="ir.ui.view">
         <field name="name">sale.order.form.inherit.chapters</field>
@@ -14,7 +10,6 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="order_description" placeholder="Descripción adicional del presupuesto..."/>
             </xpath>
-            
             <!-- Agregar botón de cargar plantilla antes del campo order_line -->
             <xpath expr="//field[@name='order_line']" position="before">
                 <div class="row mb-3">
