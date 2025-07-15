@@ -905,83 +905,40 @@ class SaleOrderChapterTemplateLine(models.Model):
         
         return super().create(vals)
     
-    @api.onchange('line_type', 'template_id')
-    def _onchange_line_type_template(self):
-        """Filtrar productos basado en el tipo de sección y nombre de la plantilla"""
-        if self.line_type and self.template_id:
-            # Crear dominio base para productos vendibles
-            domain = [('sale_ok', '=', True)]
-            
-            # Crear lista de condiciones para el filtro por tipo de sección
-            section_conditions = []
-            
-            # Filtrar por tipo de sección en el nombre o categoría del producto
-            if self.line_type == 'alquiler':
-                section_conditions = [
-                    ('name', 'ilike', 'alquiler'),
-                    ('name', 'ilike', 'alqui'),
-                    ('categ_id.name', 'ilike', 'alquiler'),
-                    ('default_code', 'ilike', 'ALQ')
-                ]
-            elif self.line_type == 'montaje':
-                section_conditions = [
-                    ('name', 'ilike', 'montaje'),
-                    ('name', 'ilike', 'instalacion'),
-                    ('name', 'ilike', 'instalación'),
-                    ('categ_id.name', 'ilike', 'montaje'),
-                    ('default_code', 'ilike', 'MON')
-                ]
-            elif self.line_type == 'portes':
-                section_conditions = [
-                    ('name', 'ilike', 'porte'),
-                    ('name', 'ilike', 'transporte'),
-                    ('name', 'ilike', 'envio'),
-                    ('name', 'ilike', 'envío'),
-                    ('categ_id.name', 'ilike', 'transporte'),
-                    ('default_code', 'ilike', 'POR')
-                ]
-            elif self.line_type == 'otros':
-                # Para "otros", incluir productos que no coincidan con los otros tipos
-                section_conditions = [
-                    ('name', 'not ilike', 'alquiler'),
-                    ('name', 'not ilike', 'montaje'),
-                    ('name', 'not ilike', 'porte'),
-                    ('name', 'not ilike', 'transporte')
-                ]
-            
-            # Agregar condiciones de sección al dominio
-            if section_conditions:
-                if len(section_conditions) > 1:
-                    # Agregar operadores OR entre las condiciones
-                    for i in range(len(section_conditions) - 1):
-                        domain.append('|')
-                domain.extend(section_conditions)
-            
-            # Filtrar adicionalmente por el nombre de la plantilla si contiene palabras clave
-            template_name = self.template_id.name.lower()
-            template_keywords = [word for word in template_name.split() if len(word) > 3]
-            
-            # Agregar filtros basados en palabras clave del nombre de la plantilla
-            if template_keywords:
-                template_conditions = []
-                for keyword in template_keywords:
-                    template_conditions.extend([
-                        ('name', 'ilike', keyword),
-                        ('categ_id.name', 'ilike', keyword),
-                        ('default_code', 'ilike', keyword.upper())
-                    ])
-                
-                if template_conditions:
-                    # Combinar con OR los filtros de plantilla y sección
-                    domain.append('|')
-                    # Agregar operadores OR entre las condiciones de plantilla
-                    for i in range(len(template_conditions) - 1):
-                        domain.append('|')
-                    domain.extend(template_conditions)
-            
-            return {'domain': {'product_id': domain}}
+    @api.onchange('line_type')
+    def _onchange_line_type(self):
+        """Filtrar productos basado en el tipo de sección"""
+        domain = [('sale_ok', '=', True)]
         
-        return {'domain': {'product_id': [('sale_ok', '=', True)]}}
+        if self.line_type == 'alquiler':
+            domain.extend([
+                '|', '|', '|',
+                ('name', 'ilike', 'alquiler'),
+                ('name', 'ilike', 'alqui'),
+                ('categ_id.name', 'ilike', 'alquiler'),
+                ('default_code', 'ilike', 'ALQ')
+            ])
+        elif self.line_type == 'montaje':
+            domain.extend([
+                '|', '|', '|', '|',
+                ('name', 'ilike', 'montaje'),
+                ('name', 'ilike', 'instalacion'),
+                ('name', 'ilike', 'instalación'),
+                ('categ_id.name', 'ilike', 'montaje'),
+                ('default_code', 'ilike', 'MON')
+            ])
+        elif self.line_type == 'portes':
+            domain.extend([
+                '|', '|', '|', '|', '|',
+                ('name', 'ilike', 'porte'),
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'envio'),
+                ('name', 'ilike', 'envío'),
+                ('categ_id.name', 'ilike', 'transporte'),
+                ('default_code', 'ilike', 'POR')
+            ])
+        
+        return {'domain': {'product_id': domain}}
     
     @api.onchange('product_id')
     def _onchange_product_id(self):
