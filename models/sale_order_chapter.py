@@ -509,7 +509,8 @@ class SaleOrderChapterLine(models.Model):
             
             record.product_domain = str(domain)
     
-    def _get_product_domain(self):
+    @api.model
+     def _get_product_domain(self):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
@@ -1092,6 +1093,7 @@ class SaleOrderChapterTemplateLine(models.Model):
             
             record.product_domain = str(domain)
     
+    @api.model
     def _get_product_domain(self):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
