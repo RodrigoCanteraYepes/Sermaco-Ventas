@@ -20,6 +20,7 @@
         'security/ir.model.access.csv',
         'data/sale_order_chapter_data.xml',
         'views/sale_order_view.xml',
+        'views/chapter_template_section_wizard_view.xml',
         'reports/sale_order_report.xml',
     ],
 

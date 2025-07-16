@@ -116,41 +116,93 @@
         <field name="model">sale.order.chapter.template</field>
         <field name="arch" type="xml">
             <form string="Plantilla de Capítulo">
-
+                <header>
+                    <button name="action_add_section" 
+                            string="Añadir Sección" 
+                            type="object" 
+                            class="btn-primary"
+                            icon="fa-plus"
+                            help="Crear una nueva sección con productos de una categoría específica"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="description" placeholder="Descripción de la plantilla..."/>
-                            <field name="line_type" string="Tipo de Sección"/>
+                            <field name="name" placeholder="Ej: Equipamiento para Eventos, Material de Construcción, etc."/>
                             <field name="active"/>
                         </group>
                         <group>
-                            <field name="product_category_id" string="Categoría de Productos" 
-                                   placeholder="Selecciona una categoría para filtrar productos..."
-                                   help="Los productos se filtrarán según esta categoría"/>
                             <field name="user_id"/>
                         </group>
                     </group>
-                    <div class="alert alert-info" style="margin: 10px 0;">
+                    
+                    <group>
+                        <field name="description" 
+                               placeholder="Especificaciones y descripción detallada de qué es esta plantilla..."
+                               nolabel="1"/>
+                    </group>
+                    
+                    <div class="alert alert-info" style="margin: 15px 0;">
                         <i class="fa fa-info-circle"></i>
-                        <strong>Filtrado Inteligente de Productos:</strong>
-                        Los productos se filtran automáticamente según el tipo de sección seleccionado y el nombre de la plantilla.
-                        Por ejemplo, al seleccionar "Alquiler" solo aparecerán productos relacionados con alquiler.
+                        <strong>Cómo usar:</strong>
+                        Utiliza el botón "Añadir Sección" para crear secciones personalizadas con productos de categorías específicas.
+                        Cada sección puede tener múltiples productos y se puede editar posteriormente.
                     </div>
+                    
                     <field name="template_line_ids">
-                        <list editable="bottom" string="Líneas de la Plantilla">
+                        <tree editable="bottom" string="Líneas de la Plantilla" decoration-bf="display_type == 'line_section'">
                             <field name="template_id" invisible="1"/>
-                            <field name="name" invisible="1"/>
-                            <field name="line_type" string="Tipo de Sección"/>
-                            <field name="is_fixed" string="Línea Fija"/>
-                            <field name="product_id" invisible="is_fixed" 
+                            <field name="display_type" invisible="1"/>
+                            <field name="is_fixed" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            
+                            <!-- Columna de Producto -->
+                            <field name="product_id" 
+                                   string="Producto"
+                                   invisible="display_type == 'line_section'"
                                    options="{'no_create': True, 'no_create_edit': True}"
-                                   placeholder="Selecciona un producto..."
-                                   context="{'line_type': line_type, 'template_category_id': parent.product_category_id}"/>
-                            <field name="product_uom_qty" invisible="is_fixed" string="Cantidad"/>
-                            <field name="price_unit" widget="monetary" invisible="is_fixed" string="Precio"/>
-                        </list>
+                                   placeholder="Selecciona un producto..."/>
+                            
+                            <!-- Columna de Descripción -->
+                            <field name="name" 
+                                   string="Descripción"
+                                   required="1"/>
+                            
+                            <!-- Columna de Cantidad -->
+                            <field name="product_uom_qty" 
+                                   string="Cantidad"
+                                   invisible="display_type == 'line_section'"/>
+                            
+                            <!-- Columna de Unidad de Medida -->
+                            <field name="product_uom" 
+                                   string="UdM"
+                                   invisible="display_type == 'line_section'"
+                                   groups="uom.group_uom"/>
+                            
+                            <!-- Columna de Precio Unitario -->
+                            <field name="price_unit" 
+                                   string="Precio Unitario"
+                                   widget="monetary"
+                                   invisible="display_type == 'line_section'"/>
+                            
+                            <!-- Columna de Descuento -->
+                            <field name="discount" 
+                                   string="Desc. %"
+                                   invisible="display_type == 'line_section'"
+                                   groups="product.group_discount_per_so_line"/>
+                            
+                            <!-- Columna de Impuestos -->
+                            <field name="tax_ids" 
+                                   string="Impuestos"
+                                   widget="many2many_tags"
+                                   invisible="display_type == 'line_section'"
+                                   options="{'no_create': True}"/>
+                            
+                            <!-- Columna de Subtotal -->
+                            <field name="price_subtotal" 
+                                   string="Subtotal"
+                                   widget="monetary"
+                                   invisible="display_type == 'line_section'"/>
+                        </tree>
                     </field>
                 </sheet>
             </form>

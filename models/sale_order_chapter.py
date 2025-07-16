@@ -637,38 +637,21 @@ class SaleOrderChapterTemplate(models.Model):
     _order = 'name'
     
     name = fields.Char(
-        string='Nombre de la Plantilla',
-        required=True
+        string='Nombre del Capítulo',
+        required=True,
+        help='Nombre que aparecerá como título del capítulo'
     )
     
     description = fields.Text(
-        string='Descripción',
-        help='Descripción detallada de la plantilla'
+        string='Descripción de la Plantilla',
+        help='Especificaciones y descripción detallada de qué es esta plantilla'
     )
-    
-    # Campo chapter_type eliminado - ahora se usa line_type en cada línea
     
     template_line_ids = fields.One2many(
         'sale.order.chapter.template.line',
         'template_id',
         string='Líneas de la Plantilla'
     )
-    
-    # Nuevos campos para configuración dinámica de categorías
-    product_category_id = fields.Many2one(
-        'product.category',
-        string='Categoría de Productos',
-        help='Categoría de productos que se mostrarán en esta plantilla'
-    )
-    
-    line_type = fields.Selection([
-        ('alquiler', 'Alquiler'),
-        ('montaje', 'Montaje'),
-        ('portes', 'Portes/Transporte'),
-        ('otros', 'Otros Conceptos'),
-        ('custom', 'Personalizado')
-    ], string='Tipo de Sección', default='custom', required=True,
-       help='Tipo de sección que determina el filtrado de productos')
     
     active = fields.Boolean(
         string='Activo',
@@ -682,44 +665,19 @@ class SaleOrderChapterTemplate(models.Model):
         readonly=True
     )
     
-    @api.onchange('product_category_id')
-    def _onchange_product_category_id(self):
-        """Actualizar el contexto para las líneas de plantilla cuando cambie la categoría"""
-        if self.product_category_id:
-            # Actualizar el contexto para filtrar productos en las líneas
-            return {
-                'context': {
-                    'template_category_id': self.product_category_id.id
-                }
-            }
-    
-    @api.model
-    def create(self, vals):
-        """Crear plantilla con secciones fijas iniciales"""
-        template = super().create(vals)
-        template._create_default_sections()
-        return template
-    
-    def _create_default_sections(self):
-        """Crea las 4 secciones fijas por defecto"""
+    def action_add_section(self):
+        """Abrir wizard para añadir nueva sección"""
         self.ensure_one()
-        # Crear líneas fijas para cada sección siempre
-        sections = [
-            {'line_type': 'alquiler', 'sequence': 100, 'name': 'Alquiler'},
-            {'line_type': 'montaje', 'sequence': 200, 'name': 'Montaje'},
-            {'line_type': 'portes', 'sequence': 300, 'name': 'Portes'},
-            {'line_type': 'otros', 'sequence': 400, 'name': 'Otros Conceptos'},
-        ]
-        for section in sections:
-            self.env['sale.order.chapter.template.line'].with_context(creating_default_sections=True).create({
-                'template_id': self.id,
-                'line_type': section['line_type'],
-                'sequence': section['sequence'],
-                'name': section['name'],
-                'product_uom_qty': 1.0,
-                'price_unit': 0.0,
-                'is_fixed': True,
-            })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Añadir Sección'),
+            'res_model': 'chapter.template.section.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_template_id': self.id,
+            }
+        }
 
     def action_reload_template_view(self):
         """Actualiza y recarga la vista de la plantilla"""
@@ -975,8 +933,6 @@ class SaleOrderChapterTemplateLine(models.Model):
     _description = 'Líneas de Plantillas de Capítulos'
     _order = 'template_id, sequence, id'
     
-
-    
     template_id = fields.Many2one(
         'sale.order.chapter.template',
         string='Plantilla',
@@ -989,36 +945,29 @@ class SaleOrderChapterTemplateLine(models.Model):
         default=10
     )
     
-    line_type = fields.Selection([
-        ('alquiler', 'Alquiler'),
-        ('montaje', 'Montaje'),
-        ('portes', 'Portes'),
-        ('otros', 'Otros Conceptos')
-    ], string='Tipo de Sección', required=True, default='otros')
+    # Campo para identificar si es una sección (título) o producto
+    display_type = fields.Selection([
+        ('line_section', 'Sección'),
+        ('product', 'Producto'),
+    ], string='Tipo de Visualización', default='product')
     
     is_fixed = fields.Boolean(
-        string='Línea Fija',
+        string='Es Sección',
         default=False,
-        help='Si está marcado, esta línea aparecerá automáticamente en todas las plantillas nuevas'
+        help='Si está marcado, esta línea es una sección (título)'
     )
     
+    # Campos que coinciden con sale.order.line
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        ondelete='set null'
-    )
-    
-    # Campo computed para el dominio dinámico
-    product_domain = fields.Char(
-        string='Dominio de Productos',
-        compute='_compute_product_domain',
-        store=False
+        ondelete='set null',
+        domain="[('sale_ok', '=', True)]"
     )
     
     name = fields.Text(
         string='Descripción',
-        required=False,
-        default='Línea de plantilla'
+        required=True
     )
     
     product_uom_qty = fields.Float(
@@ -1030,7 +979,9 @@ class SaleOrderChapterTemplateLine(models.Model):
     
     product_uom = fields.Many2one(
         'uom.uom',
-        string='Unidad de Medida'
+        string='Unidad de Medida',
+        related='product_id.uom_id',
+        readonly=True
     )
     
     price_unit = fields.Float(
@@ -1039,162 +990,67 @@ class SaleOrderChapterTemplateLine(models.Model):
         default=0.0
     )
     
+    price_subtotal = fields.Monetary(
+        string='Subtotal',
+        compute='_compute_amount',
+        store=True
+    )
+    
+    price_total = fields.Monetary(
+        string='Total',
+        compute='_compute_amount',
+        store=True
+    )
+    
     tax_ids = fields.Many2many(
         'account.tax',
         string='Impuestos',
         domain=[('type_tax_use', '=', 'sale')]
     )
     
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Moneda',
+        default=lambda self: self.env.company.currency_id
+    )
+    
+    discount = fields.Float(
+        string='Descuento (%)',
+        digits='Discount',
+        default=0.0
+    )
+    
+    @api.depends('product_uom_qty', 'price_unit', 'tax_ids', 'discount')
+    def _compute_amount(self):
+        """Calcular importes de la línea"""
+        for line in self:
+            if line.display_type == 'line_section':
+                line.price_subtotal = 0.0
+                line.price_total = 0.0
+            else:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_ids.compute_all(price, line.currency_id, line.product_uom_qty, product=line.product_id)
+                line.price_subtotal = taxes['total_excluded']
+                line.price_total = taxes['total_included']
+    
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        """Actualizar campos cuando cambie el producto"""
+        if self.product_id:
+            self.name = self.product_id.display_name
+            self.price_unit = self.product_id.list_price
+            self.tax_ids = [(6, 0, self.product_id.taxes_id.ids)]
+    
     @api.model
     def create(self, vals):
-        """Asegurar que el line_type se establece correctamente y la secuencia se ordena por tipo"""
-        # Si se está creando desde una sección específica, establecer el line_type correcto
-        if self.env.context.get('default_line_type'):
-            vals['line_type'] = self.env.context.get('default_line_type')
-        # Si no es una línea fija, calcular la secuencia para que aparezca después de la línea fija de su tipo
-        if not vals.get('is_fixed', False) and vals.get('template_id') and vals.get('line_type'):
-            template_id = vals['template_id']
-            line_type = vals['line_type']
-            # Buscar la secuencia base para este tipo de línea
-            base_sequences = {
-                'alquiler': 100,
-                'montaje': 200,
-                'portes': 300,
-                'otros': 400,
-            }
-            # Encontrar la última secuencia para este tipo de línea
-            existing_lines = self.search([
-                ('template_id', '=', template_id),
-                ('line_type', '=', line_type)
-            ], order='sequence desc', limit=1)
-            
-            if existing_lines:
-                vals['sequence'] = existing_lines.sequence + 1
-            else:
-                vals['sequence'] = base_sequences.get(line_type, 400) + 1
+        """Crear línea de plantilla"""
+        # Si es una sección, configurar display_type
+        if vals.get('is_fixed', False):
+            vals['display_type'] = 'line_section'
+        else:
+            vals['display_type'] = 'product'
+        
         return super().create(vals)
-    
-    @api.depends('line_type')
-    def _compute_product_domain(self):
-        """Calcula el dominio dinámico para productos basado en el tipo de sección"""
-        for record in self:
-            domain = [('sale_ok', '=', True)]
-            
-            if record.line_type == 'alquiler':
-                # Filtrar solo por categoría específica
-                try:
-                    alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
-                    if alquiler_cat:
-                        domain.extend([
-                            ('categ_id', 'child_of', alquiler_cat.id)
-                        ])
-                except:
-                    # Si no existe la categoría, no agregar filtros adicionales
-                    pass
-            elif record.line_type == 'montaje':
-                try:
-                    montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
-                    if montaje_cat:
-                        domain.extend([
-                            ('categ_id', 'child_of', montaje_cat.id)
-                        ])
-                except:
-                    # Si no existe la categoría, no agregar filtros adicionales
-                    pass
-            elif record.line_type == 'portes':
-                try:
-                    transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
-                    if transporte_cat:
-                        domain.extend([
-                            ('categ_id', 'child_of', transporte_cat.id)
-                        ])
-                except:
-                    # Si no existe la categoría, no agregar filtros adicionales
-                    pass
-            elif record.line_type == 'otros':
-                # Para otros conceptos, usar filtrado básico si las categorías no existen
-                try:
-                    otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
-                    chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
-                    if otros_cat and chapters_cat:
-                        domain.extend([
-                            '|',
-                            ('categ_id', 'child_of', otros_cat.id),
-                            ('categ_id', 'not child_of', chapters_cat.id)
-                        ])
-                except:
-                    # Si no existen las categorías, no agregar filtros adicionales
-                    pass
-            
-            record.product_domain = str(domain)
-    
-    def _get_product_domain(self):
-        """Retorna el dominio para el campo product_id"""
-        domain = [('sale_ok', '=', True)]
-        
-        # Obtener la categoría configurada desde la plantilla
-        if self.template_id and self.template_id.product_category_id:
-            domain.extend([
-                ('categ_id', 'child_of', self.template_id.product_category_id.id)
-            ])
-            return domain
-        
-        # Obtener la categoría configurada desde el contexto (para plantillas)
-        template_category_id = self.env.context.get('template_category_id')
-        if template_category_id:
-            domain.extend([
-                ('categ_id', 'child_of', template_category_id)
-            ])
-            return domain
-        
-        # Usar line_type del contexto si está disponible (para nuevas líneas)
-        line_type = self.env.context.get('line_type') or getattr(self, 'line_type', None)
-        
-        if line_type == 'alquiler':
-            # Buscar categorías que contengan 'Alquiler' en el nombre
-            alquiler_categories = self.env['product.category'].search([
-                ('name', 'ilike', 'alquiler')
-            ])
-            if alquiler_categories:
-                domain.extend([
-                    ('categ_id', 'in', alquiler_categories.ids)
-                ])
-        elif line_type == 'montaje':
-            # Buscar categorías que contengan 'Montaje' en el nombre
-            montaje_categories = self.env['product.category'].search([
-                ('name', 'ilike', 'montaje')
-            ])
-            if montaje_categories:
-                domain.extend([
-                    ('categ_id', 'in', montaje_categories.ids)
-                ])
-        elif line_type == 'portes':
-            # Buscar categorías que contengan 'Transporte' o 'Portes' en el nombre
-            transporte_categories = self.env['product.category'].search([
-                '|',
-                ('name', 'ilike', 'transporte'),
-                ('name', 'ilike', 'portes')
-            ])
-            if transporte_categories:
-                domain.extend([
-                    ('categ_id', 'in', transporte_categories.ids)
-                ])
-        elif line_type == 'otros':
-            # Para otros conceptos, excluir las categorías específicas de alquiler, montaje y transporte
-            excluded_categories = self.env['product.category'].search([
-                '|', '|',
-                ('name', 'ilike', 'alquiler'),
-                ('name', 'ilike', 'montaje'),
-                '|',
-                ('name', 'ilike', 'transporte'),
-                ('name', 'ilike', 'portes')
-            ])
-            if excluded_categories:
-                domain.extend([
-                    ('categ_id', 'not in', excluded_categories.ids)
-                ])
-        
-        return domain
 
 
 class ChapterTemplateWizard(models.TransientModel):
