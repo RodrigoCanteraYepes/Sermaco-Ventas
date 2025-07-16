@@ -150,7 +150,6 @@
                     
                     <field name="template_line_ids">
                         <tree editable="bottom" string="Líneas de la Plantilla" decoration-bf="display_type == 'line_section'">
-                            <field name="template_id" invisible="1"/>
                             <field name="display_type" invisible="1"/>
                             <field name="is_fixed" invisible="1"/>
                             <field name="currency_id" invisible="1"/>
