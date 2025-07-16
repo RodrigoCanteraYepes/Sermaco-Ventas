@@ -663,7 +663,6 @@ class SaleOrderChapterTemplate(models.Model):
     def _create_default_sections(self):
         """Crea las 4 secciones fijas por defecto"""
         self.ensure_one()
-        
         # Crear líneas fijas para cada sección siempre
         sections = [
             {'line_type': 'alquiler', 'sequence': 100, 'name': 'Alquiler'},
@@ -671,7 +670,6 @@ class SaleOrderChapterTemplate(models.Model):
             {'line_type': 'portes', 'sequence': 300, 'name': 'Portes'},
             {'line_type': 'otros', 'sequence': 400, 'name': 'Otros Conceptos'},
         ]
-        
         for section in sections:
             self.env['sale.order.chapter.template.line'].with_context(creating_default_sections=True).create({
                 'template_id': self.id,
@@ -682,6 +680,14 @@ class SaleOrderChapterTemplate(models.Model):
                 'price_unit': 0.0,
                 'is_fixed': True,
             })
+
+    def action_reload_template_view(self):
+        """Actualiza y recarga la vista de la plantilla"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
     
     def action_apply_template(self):
         """Aplica la plantilla creando un capítulo con todas las líneas o cargando directamente en líneas del pedido"""
