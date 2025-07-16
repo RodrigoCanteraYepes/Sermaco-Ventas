@@ -411,15 +411,15 @@ class SaleOrderChapterLine(models.Model):
         for line in self:
             # Las líneas fijas de alquiler y montaje no se pueden eliminar
             if line.is_fixed and line.line_type in ('alquiler', 'montaje'):
-                raise AccessError(_('No se pueden eliminar las líneas de sección de alquiler y montaje.'))
+                raise AccessError(_('No se pueden modificar ni eliminar las líneas fijas de sección de alquiler o montaje. Modifique estas líneas solo desde la plantilla correspondiente.'))
             
             # Las líneas de datos de alquiler y montaje no se pueden eliminar
             if not line.is_fixed and line.line_type in ('alquiler', 'montaje'):
-                raise AccessError(_('No se pueden eliminar las líneas de alquiler y montaje.'))
+                raise AccessError(_('No se pueden modificar ni eliminar las líneas de datos de alquiler o montaje. Modifique estas líneas solo desde la plantilla correspondiente.'))
             
             # Para otras líneas, solo gerentes pueden eliminar
             if not self.env.user.has_group('sales_team.group_sale_manager'):
-                raise AccessError(_('Solo los gerentes de ventas pueden eliminar líneas de capítulos.'))
+                raise AccessError(_('Solo los gerentes de ventas pueden eliminar o modificar líneas de capítulos.'))
         
         return super().unlink()
     
@@ -1133,7 +1133,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                 pass
         
         return domain
-    
+
     @api.onchange('line_type')
     def _onchange_line_type(self):
         """Limpiar producto cuando cambia el tipo de línea"""

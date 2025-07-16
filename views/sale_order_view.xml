@@ -151,8 +151,7 @@
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
                                    placeholder="Selecciona un producto..."
-                                   context="{'line_type': line_type}"
-                                   domain="product_domain"/>
+                                   context="{'line_type': line_type}"/>
                             <field name="product_uom_qty" invisible="is_fixed" string="Cantidad"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed" string="Precio"/>
                         </list>
