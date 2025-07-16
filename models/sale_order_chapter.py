@@ -516,7 +516,7 @@ class SaleOrderChapterLine(models.Model):
         # Usar line_type del contexto si está disponible (para nuevas líneas)
         line_type = self.env.context.get('line_type') or self.line_type
         
-        if line_type == 'Alquiler':
+        if line_type == 'alquiler':
             try:
                 alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
                 if alquiler_cat:
@@ -525,7 +525,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Montaje':
+        elif line_type == 'montaje':
             try:
                 montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
                 if montaje_cat:
@@ -534,7 +534,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Portes':
+        elif line_type == 'portes':
             try:
                 transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
                 if transporte_cat:
@@ -543,7 +543,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Otros':
+        elif line_type == 'otros':
             try:
                 otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
                 chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
@@ -1099,7 +1099,7 @@ class SaleOrderChapterTemplateLine(models.Model):
         # Usar line_type del contexto si está disponible (para nuevas líneas)
         line_type = self.env.context.get('line_type') or self.line_type
         
-        if line_type == 'Alquiler':
+        if line_type == 'alquiler':
             try:
                 alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
                 if alquiler_cat:
@@ -1108,7 +1108,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Montaje':
+        elif line_type == 'montaje':
             try:
                 montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
                 if montaje_cat:
@@ -1117,7 +1117,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Portes':
+        elif line_type == 'portes':
             try:
                 transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
                 if transporte_cat:
@@ -1126,7 +1126,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif line_type == 'Otros':
+        elif line_type == 'otros':
             try:
                 otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
                 chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
