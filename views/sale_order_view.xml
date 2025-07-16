@@ -34,6 +34,7 @@
             <!-- Configurar contexto del campo order_line con vista personalizada -->
             <xpath expr="//field[@name='order_line']" position="attributes">
                 <attribute name="context">{'default_order_id': id, 'show_chapters': True, 'tree_view_ref': 'SermacoV1.view_order_line_list_collapse'}</attribute>
+                <attribute name="options">{'no_create_section': True}</attribute>
             </xpath>
             
 
