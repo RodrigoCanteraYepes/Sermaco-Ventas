@@ -217,7 +217,6 @@ class SaleOrderChapterLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain="_get_product_domain",
         ondelete='set null'
     )
     
@@ -965,7 +964,6 @@ class SaleOrderChapterTemplateLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
-        domain="_get_product_domain",
         ondelete='set null'
     )
     
