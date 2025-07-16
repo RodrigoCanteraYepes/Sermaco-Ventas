@@ -217,6 +217,7 @@ class SaleOrderChapterLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
+        domain="_get_product_domain",
         ondelete='set null'
     )
     
@@ -512,7 +513,10 @@ class SaleOrderChapterLine(models.Model):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
-        if self.line_type == 'alquiler':
+        # Usar line_type del contexto si está disponible (para nuevas líneas)
+        line_type = self.env.context.get('line_type') or self.line_type
+        
+        if line_type == 'Alquiler':
             try:
                 alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
                 if alquiler_cat:
@@ -521,7 +525,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'montaje':
+        elif line_type == 'Montaje':
             try:
                 montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
                 if montaje_cat:
@@ -530,7 +534,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'portes':
+        elif line_type == 'Portes':
             try:
                 transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
                 if transporte_cat:
@@ -539,7 +543,7 @@ class SaleOrderChapterLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'otros':
+        elif line_type == 'Otros':
             try:
                 otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
                 chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
@@ -964,6 +968,7 @@ class SaleOrderChapterTemplateLine(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Producto',
+        domain="_get_product_domain",
         ondelete='set null'
     )
     
@@ -1091,7 +1096,10 @@ class SaleOrderChapterTemplateLine(models.Model):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
-        if self.line_type == 'alquiler':
+        # Usar line_type del contexto si está disponible (para nuevas líneas)
+        line_type = self.env.context.get('line_type') or self.line_type
+        
+        if line_type == 'Alquiler':
             try:
                 alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
                 if alquiler_cat:
@@ -1100,7 +1108,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'montaje':
+        elif line_type == 'Montaje':
             try:
                 montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
                 if montaje_cat:
@@ -1109,7 +1117,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'portes':
+        elif line_type == 'Portes':
             try:
                 transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
                 if transporte_cat:
@@ -1118,7 +1126,7 @@ class SaleOrderChapterTemplateLine(models.Model):
                     ])
             except:
                 pass
-        elif self.line_type == 'otros':
+        elif line_type == 'Otros':
             try:
                 otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
                 chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)

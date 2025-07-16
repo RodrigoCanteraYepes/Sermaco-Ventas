@@ -116,14 +116,14 @@
         <field name="model">sale.order.chapter.template</field>
         <field name="arch" type="xml">
             <form string="Plantilla de Capítulo">
-                <!-- <header>
+                <header>
                     <button name="action_reload_template_view" 
                             string="Actualizar Vista" 
                             type="object" 
                             class="btn-info"
                             icon="fa-refresh"
                             help="Actualiza y recarga la vista para ver los cambios"/>
-                </header> -->
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -149,7 +149,8 @@
                             <field name="is_fixed" string="Línea Fija"/>
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
-                                   placeholder="Selecciona un producto..."/>
+                                   placeholder="Selecciona un producto..."
+                                   context="{'line_type': line_type}"/>
                             <field name="product_uom_qty" invisible="is_fixed" string="Cantidad"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed" string="Precio"/>
                         </list>
