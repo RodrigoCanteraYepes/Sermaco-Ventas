@@ -62,7 +62,7 @@ class ChapterTemplateSectionWizard(models.TransientModel):
             'template_id': self.template_id.id,
             'name': self.section_name,
             'sequence': next_sequence,
-            'line_type': 'custom',
+            'display_type': 'line_section',
             'is_fixed': True,  # Las secciones son líneas fijas
             'product_uom_qty': 0.0,
             'price_unit': 0.0,
@@ -76,7 +76,7 @@ class ChapterTemplateSectionWizard(models.TransientModel):
                 'product_id': product.id,
                 'name': product.display_name,
                 'sequence': next_sequence,
-                'line_type': 'custom',
+                'display_type': 'product',
                 'is_fixed': False,
                 'product_uom_qty': 1.0,
                 'price_unit': product.list_price,
