@@ -20,13 +20,7 @@
                            invisible="not product_category_id"
                            widget="many2many_tags"
                            options="{'no_create': True, 'no_create_edit': True}"
-                           placeholder="Selecciona los productos que quieres añadir a esta sección...">
-                        <tree>
-                            <field name="name"/>
-                            <field name="list_price" widget="monetary"/>
-                            <field name="categ_id"/>
-                        </tree>
-                    </field>
+                           placeholder="Selecciona los productos que quieres añadir a esta sección..."/>
                     
                     <div class="alert alert-info" style="margin-top: 15px;" invisible="not product_category_id">
                         <i class="fa fa-info-circle"></i>
