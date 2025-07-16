@@ -509,13 +509,12 @@ class SaleOrderChapterLine(models.Model):
             
             record.product_domain = str(domain)
     
-    @api.model
-     def _get_product_domain(self):
+    def _get_product_domain(self):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
         # Usar line_type del contexto si está disponible (para nuevas líneas)
-        line_type = self.env.context.get('line_type') or self.line_type
+        line_type = self.env.context.get('line_type') or getattr(self, 'line_type', None)
         
         if line_type == 'alquiler':
             try:
@@ -1093,13 +1092,12 @@ class SaleOrderChapterTemplateLine(models.Model):
             
             record.product_domain = str(domain)
     
-    @api.model
     def _get_product_domain(self):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
         # Usar line_type del contexto si está disponible (para nuevas líneas)
-        line_type = self.env.context.get('line_type') or self.line_type
+        line_type = self.env.context.get('line_type') or getattr(self, 'line_type', None)
         
         if line_type == 'alquiler':
             try:
