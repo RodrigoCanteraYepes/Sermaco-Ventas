@@ -116,14 +116,7 @@
         <field name="model">sale.order.chapter.template</field>
         <field name="arch" type="xml">
             <form string="Plantilla de Capítulo">
-                <header>
-                    <button name="action_reload_template_view" 
-                            string="Actualizar Vista" 
-                            type="object" 
-                            class="btn-info"
-                            icon="fa-refresh"
-                            help="Actualiza y recarga la vista para ver los cambios"/>
-                </header>
+
                 <sheet>
                     <group>
                         <group>
