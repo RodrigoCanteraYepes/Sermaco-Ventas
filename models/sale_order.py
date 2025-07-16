@@ -367,7 +367,6 @@ class SaleOrder(models.Model):
             }
         }
     
-
     
     def action_toggle_all_sections_collapse(self):
         """Alterna el estado de colapso de todas las secciones"""

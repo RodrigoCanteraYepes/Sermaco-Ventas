@@ -122,9 +122,13 @@
                         <group>
                             <field name="name"/>
                             <field name="description" placeholder="Descripción de la plantilla..."/>
+                            <field name="line_type" string="Tipo de Sección"/>
                             <field name="active"/>
                         </group>
                         <group>
+                            <field name="product_category_id" string="Categoría de Productos" 
+                                   placeholder="Selecciona una categoría para filtrar productos..."
+                                   help="Los productos se filtrarán según esta categoría"/>
                             <field name="user_id"/>
                         </group>
                     </group>
@@ -143,7 +147,7 @@
                             <field name="product_id" invisible="is_fixed" 
                                    options="{'no_create': True, 'no_create_edit': True}"
                                    placeholder="Selecciona un producto..."
-                                   context="{'line_type': line_type}"/>
+                                   context="{'line_type': line_type, 'template_category_id': parent.product_category_id}"/>
                             <field name="product_uom_qty" invisible="is_fixed" string="Cantidad"/>
                             <field name="price_unit" widget="monetary" invisible="is_fixed" string="Precio"/>
                         </list>

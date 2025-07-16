@@ -512,48 +512,61 @@ class SaleOrderChapterLine(models.Model):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
+        # Obtener la categoría configurada desde el contexto (para plantillas)
+        template_category_id = self.env.context.get('template_category_id')
+        if template_category_id:
+            domain.extend([
+                ('categ_id', 'child_of', template_category_id)
+            ])
+            return domain
+        
         # Usar line_type del contexto si está disponible (para nuevas líneas)
         line_type = self.env.context.get('line_type') or getattr(self, 'line_type', None)
         
         if line_type == 'alquiler':
-            try:
-                alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
-                if alquiler_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', alquiler_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Alquiler' en el nombre
+            alquiler_categories = self.env['product.category'].search([
+                ('name', 'ilike', 'alquiler')
+            ])
+            if alquiler_categories:
+                domain.extend([
+                    ('categ_id', 'in', alquiler_categories.ids)
+                ])
         elif line_type == 'montaje':
-            try:
-                montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
-                if montaje_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', montaje_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Montaje' en el nombre
+            montaje_categories = self.env['product.category'].search([
+                ('name', 'ilike', 'montaje')
+            ])
+            if montaje_categories:
+                domain.extend([
+                    ('categ_id', 'in', montaje_categories.ids)
+                ])
         elif line_type == 'portes':
-            try:
-                transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
-                if transporte_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', transporte_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Transporte' o 'Portes' en el nombre
+            transporte_categories = self.env['product.category'].search([
+                '|',
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'portes')
+            ])
+            if transporte_categories:
+                domain.extend([
+                    ('categ_id', 'in', transporte_categories.ids)
+                ])
         elif line_type == 'otros':
-            try:
-                otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
-                chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
-                if otros_cat and chapters_cat:
-                    domain.extend([
-                        '|',
-                        ('categ_id', 'child_of', otros_cat.id),
-                        ('categ_id', 'not child_of', chapters_cat.id)
-                    ])
-            except:
-                pass
+            # Para otros conceptos, excluir las categorías específicas de alquiler, montaje y transporte
+            excluded_categories = self.env['product.category'].search([
+                '|', '|',
+                ('name', 'ilike', 'alquiler'),
+                ('name', 'ilike', 'montaje'),
+                '|',
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'portes')
+            ])
+            if excluded_categories:
+                domain.extend([
+                    ('categ_id', 'not in', excluded_categories.ids)
+                ])
+        
         return domain
 
 
@@ -641,7 +654,21 @@ class SaleOrderChapterTemplate(models.Model):
         string='Líneas de la Plantilla'
     )
     
-
+    # Nuevos campos para configuración dinámica de categorías
+    product_category_id = fields.Many2one(
+        'product.category',
+        string='Categoría de Productos',
+        help='Categoría de productos que se mostrarán en esta plantilla'
+    )
+    
+    line_type = fields.Selection([
+        ('alquiler', 'Alquiler'),
+        ('montaje', 'Montaje'),
+        ('portes', 'Portes/Transporte'),
+        ('otros', 'Otros Conceptos'),
+        ('custom', 'Personalizado')
+    ], string='Tipo de Sección', default='custom', required=True,
+       help='Tipo de sección que determina el filtrado de productos')
     
     active = fields.Boolean(
         string='Activo',
@@ -654,6 +681,17 @@ class SaleOrderChapterTemplate(models.Model):
         default=lambda self: self.env.user,
         readonly=True
     )
+    
+    @api.onchange('product_category_id')
+    def _onchange_product_category_id(self):
+        """Actualizar el contexto para las líneas de plantilla cuando cambie la categoría"""
+        if self.product_category_id:
+            # Actualizar el contexto para filtrar productos en las líneas
+            return {
+                'context': {
+                    'template_category_id': self.product_category_id.id
+                }
+            }
     
     @api.model
     def create(self, vals):
@@ -1094,48 +1132,68 @@ class SaleOrderChapterTemplateLine(models.Model):
         """Retorna el dominio para el campo product_id"""
         domain = [('sale_ok', '=', True)]
         
+        # Obtener la categoría configurada desde la plantilla
+        if self.template_id and self.template_id.product_category_id:
+            domain.extend([
+                ('categ_id', 'child_of', self.template_id.product_category_id.id)
+            ])
+            return domain
+        
+        # Obtener la categoría configurada desde el contexto (para plantillas)
+        template_category_id = self.env.context.get('template_category_id')
+        if template_category_id:
+            domain.extend([
+                ('categ_id', 'child_of', template_category_id)
+            ])
+            return domain
+        
         # Usar line_type del contexto si está disponible (para nuevas líneas)
         line_type = self.env.context.get('line_type') or getattr(self, 'line_type', None)
         
         if line_type == 'alquiler':
-            try:
-                alquiler_cat = self.env.ref('sermaco_sale_order_chapters.product_category_alquiler', raise_if_not_found=False)
-                if alquiler_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', alquiler_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Alquiler' en el nombre
+            alquiler_categories = self.env['product.category'].search([
+                ('name', 'ilike', 'alquiler')
+            ])
+            if alquiler_categories:
+                domain.extend([
+                    ('categ_id', 'in', alquiler_categories.ids)
+                ])
         elif line_type == 'montaje':
-            try:
-                montaje_cat = self.env.ref('sermaco_sale_order_chapters.product_category_montaje', raise_if_not_found=False)
-                if montaje_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', montaje_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Montaje' en el nombre
+            montaje_categories = self.env['product.category'].search([
+                ('name', 'ilike', 'montaje')
+            ])
+            if montaje_categories:
+                domain.extend([
+                    ('categ_id', 'in', montaje_categories.ids)
+                ])
         elif line_type == 'portes':
-            try:
-                transporte_cat = self.env.ref('sermaco_sale_order_chapters.product_category_transporte', raise_if_not_found=False)
-                if transporte_cat:
-                    domain.extend([
-                        ('categ_id', 'child_of', transporte_cat.id)
-                    ])
-            except:
-                pass
+            # Buscar categorías que contengan 'Transporte' o 'Portes' en el nombre
+            transporte_categories = self.env['product.category'].search([
+                '|',
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'portes')
+            ])
+            if transporte_categories:
+                domain.extend([
+                    ('categ_id', 'in', transporte_categories.ids)
+                ])
         elif line_type == 'otros':
-            try:
-                otros_cat = self.env.ref('sermaco_sale_order_chapters.product_category_otros', raise_if_not_found=False)
-                chapters_cat = self.env.ref('sermaco_sale_order_chapters.product_category_chapters', raise_if_not_found=False)
-                if otros_cat and chapters_cat:
-                    domain.extend([
-                        '|',
-                        ('categ_id', 'child_of', otros_cat.id),
-                        ('categ_id', 'not child_of', chapters_cat.id)
-                    ])
-            except:
-                pass
+            # Para otros conceptos, excluir las categorías específicas de alquiler, montaje y transporte
+            excluded_categories = self.env['product.category'].search([
+                '|', '|',
+                ('name', 'ilike', 'alquiler'),
+                ('name', 'ilike', 'montaje'),
+                '|',
+                ('name', 'ilike', 'transporte'),
+                ('name', 'ilike', 'portes')
+            ])
+            if excluded_categories:
+                domain.extend([
+                    ('categ_id', 'not in', excluded_categories.ids)
+                ])
+        
         return domain
 
 
