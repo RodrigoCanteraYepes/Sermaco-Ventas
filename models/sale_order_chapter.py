@@ -606,10 +606,19 @@ class ChapterTemplateWizard(models.TransientModel):
             
             # Crear las líneas del capítulo basadas en la plantilla
             for template_line in template.template_line_ids:
+                # Mapear display_type a line_type y is_fixed
+                if template_line.display_type == 'line_section':
+                    line_type = 'otros'  # Las secciones van como 'otros'
+                    is_fixed = True
+                else:
+                    line_type = 'otros'  # Por defecto, usar 'otros' para productos
+                    is_fixed = False
+                
                 line_vals = {
                     'chapter_id': chapter.id,
                     'sequence': template_line.sequence,
-                    'line_type': template_line.line_type,
+                    'line_type': line_type,
+                    'is_fixed': is_fixed,
                     'product_id': template_line.product_id.id if template_line.product_id else False,
                     'name': template_line.name,
                     'product_uom_qty': template_line.product_uom_qty,
