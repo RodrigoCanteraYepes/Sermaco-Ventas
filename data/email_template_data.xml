@@ -38,13 +38,7 @@
             <field name="auto_delete" eval="True"/>
         </record>
 
-        <!-- Configurar como template por defecto para sale.order -->
-        <record id="sale_order_email_template_default" model="ir.model.data">
-            <field name="name">mail_template_sale_confirmation</field>
-            <field name="module">sale</field>
-            <field name="model">mail.template</field>
-            <field name="res_id" ref="email_template_sale_order_modern"/>
-            <field name="noupdate" eval="False"/>
-        </record>
+        <!-- Template adicional disponible para selección manual -->
+        <!-- No reemplaza el template por defecto para evitar conflictos -->
     </data>
 </odoo>
