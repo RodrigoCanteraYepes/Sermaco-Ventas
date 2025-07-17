@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+<data>
         <!-- Template de email personalizado para presupuestos con reporte moderno -->
         <record id="email_template_sale_order_modern" model="mail.template">
             <field name="name">Presupuesto: Envío con Diseño Moderno</field>
