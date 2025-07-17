@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sale Order Chapters',
-    'version': '18.0.1.0.10',
+    'version': '18.0.1.0.12',
     'category': 'Sales',
     'summary': 'Añade capítulos personalizados a los presupuestos de venta',
     'description': """
@@ -19,7 +19,6 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sale_order_chapter_data.xml',
-        'data/email_template_data.xml',
         'views/sale_order_view.xml',
         'views/chapter_template_section_wizard_view.xml',
         'reports/sale_order_report.xml',
