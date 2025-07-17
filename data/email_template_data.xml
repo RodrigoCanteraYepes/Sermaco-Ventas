@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Template de email personalizado para presupuestos con reporte moderno -->
+        <record id="email_template_sale_order_modern" model="mail.template">
+            <field name="name">Presupuesto: Envío con Diseño Moderno</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">{{ object.company_id.name }} Presupuesto (Ref {{ object.name or 'n/a' }})</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to">{{ object.partner_id.id }}</field>
+            <field name="description">Enviado a clientes cuando se confirma un presupuesto con diseño moderno</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p>Estimado/a {{ object.partner_id.name }},</p>
+    <br/>
+    <p>Adjuntamos su presupuesto <strong>{{ object.name }}</strong>
+        {% if object.client_order_ref %}
+            (su referencia: {{ object.client_order_ref }})
+        {% endif %}
+        con un importe total de <strong>{{ format_amount(object.amount_total, object.currency_id) }}</strong>.
+    </p>
+    <br/>
+    <p>Este presupuesto es válido hasta el {{ format_date(object.validity_date) if object.validity_date else 'fecha a convenir' }}.</p>
+    <br/>
+    <p>No dude en contactarnos si tiene alguna pregunta.</p>
+    <br/>
+    <p>Saludos cordiales,</p>
+    <p>{{ object.user_id.name }}</p>
+    <p>{{ object.company_id.name }}</p>
+    {% if object.company_id.phone %}
+        <p>Tel: {{ object.company_id.phone }}</p>
+    {% endif %}
+</div>
+            </field>
+            <field name="report_template" ref="sale_order_chapter.action_report_saleorder_chapters_modern"/>
+            <field name="report_name">Presupuesto_{{ (object.name or '').replace('/','-') }}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- Configurar como template por defecto para sale.order -->
+        <record id="sale_order_email_template_default" model="ir.model.data">
+            <field name="name">mail_template_sale_confirmation</field>
+            <field name="module">sale</field>
+            <field name="model">mail.template</field>
+            <field name="res_id" ref="email_template_sale_order_modern"/>
+            <field name="noupdate" eval="False"/>
+        </record>
+    </data>
+</odoo>
