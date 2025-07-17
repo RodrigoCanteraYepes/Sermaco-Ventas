@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Reporte moderno para presupuestos con capítulos -->
+        <record id="action_report_saleorder_chapters_modern" model="ir.actions.report">
+            <field name="name">Presupuesto Moderno con Capítulos</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">sale_order_chapter.report_saleorder_chapters_modern</field>
+            <field name="report_file">sale_order_chapter.report_saleorder_chapters_modern</field>
+            <field name="print_report_name">'Presupuesto - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- Estilos CSS personalizados -->
+        <template id="report_saleorder_chapters_modern_styles">
+            <style>
+                .modern-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 25px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                }
+                
+                .info-card {
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                }
+                
+                .chapter-container {
+                    background: white;
+                    border: 1px solid #dee2e6;
+                    border-radius: 12px;
+                    margin-bottom: 25px;
+                    overflow: hidden;
+                    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+                }
+                
+                .chapter-header {
+                    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+                    color: white;
+                    padding: 18px 25px;
+                    font-size: 18px;
+                    font-weight: 600;
+                    border-bottom: 3px solid #0056b3;
+                }
+                
+                .chapter-table {
+                    margin: 0;
+                }
+                
+                .chapter-table thead th {
+                    background: #e3f2fd;
+                    color: #1565c0;
+                    font-weight: 600;
+                    border: none;
+                    padding: 15px 12px;
+                    font-size: 14px;
+                }
+                
+                .chapter-table tbody td {
+                    padding: 12px;
+                    border-bottom: 1px solid #f0f0f0;
+                    vertical-align: middle;
+                }
+                
+                .chapter-table tbody tr:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .chapter-total {
+                    background: linear-gradient(90deg, #56ab2f 0%, #a8e6cf 100%);
+                    color: white;
+                    font-weight: 700;
+                    padding: 15px 12px;
+                }
+                
+                .total-section {
+                    background: #f8f9fa;
+                    border: 2px solid #dee2e6;
+                    border-radius: 10px;
+                    padding: 25px;
+                    margin-top: 30px;
+                }
+                
+                .total-table {
+                    background: white;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                }
+                
+                .total-table td {
+                    padding: 12px 20px;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .final-total {
+                    background: linear-gradient(90deg, #ff6b6b 0%, #ffa726 100%);
+                    color: white;
+                    font-weight: 700;
+                    font-size: 16px;
+                }
+                
+                .terms-section {
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-top: 25px;
+                }
+                
+                .badge-section {
+                    display: inline-block;
+                    background: #17a2b8;
+                    color: white;
+                    padding: 5px 12px;
+                    border-radius: 15px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    margin-bottom: 10px;
+                }
+                
+                .product-name {
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+                
+                .description-text {
+                    color: #6c757d;
+                    font-size: 13px;
+                }
+                
+                .price-highlight {
+                    font-weight: 600;
+                    color: #28a745;
+                }
+            </style>
+        </template>
+
+        <!-- Template del reporte moderno -->
+        <template id="report_saleorder_chapters_modern">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <!-- Incluir estilos -->
+                            <t t-call="sale_order_chapter.report_saleorder_chapters_modern_styles"/>
+                            
+                            <!-- Encabezado moderno -->
+                            <div class="modern-header">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <h2 style="margin: 0; font-weight: 300;">
+                                            <i class="fa fa-file-text-o" style="margin-right: 10px;"></i>
+                                            Presupuesto <span t-field="doc.name" style="font-weight: 600;"/>
+                                        </h2>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                        <div class="badge-section">PRESUPUESTO</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información del presupuesto -->
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="info-card">
+                                        <h5 style="color: #495057; margin-bottom: 15px;">
+                                            <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+                                            Información del Presupuesto
+                                        </h5>
+                                        <p style="margin-bottom: 8px;">
+                                            <strong>Fecha:</strong> 
+                                            <span t-field="doc.date_order" t-options='{"widget": "date"}'/>
+                                        </p>
+                                        <p style="margin-bottom: 8px;">
+                                            <strong>Validez:</strong> 
+                                            <span t-field="doc.validity_date" t-options='{"widget": "date"}'/>
+                                        </p>
+                                        <p style="margin-bottom: 0;">
+                                            <strong>Comercial:</strong> 
+                                            <span t-field="doc.user_id.name"/>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-card">
+                                        <h5 style="color: #495057; margin-bottom: 15px;">
+                                            <i class="fa fa-user" style="margin-right: 8px;"></i>
+                                            Información del Cliente
+                                        </h5>
+                                        <p style="margin-bottom: 8px;">
+                                            <strong>Cliente:</strong> 
+                                            <span t-field="doc.partner_id.name"/>
+                                        </p>
+                                        <div t-if="doc.partner_id.street">
+                                            <p style="margin-bottom: 8px;">
+                                                <strong>Dirección:</strong> 
+                                                <span t-field="doc.partner_id.street"/>
+                                            </p>
+                                        </div>
+                                        <div t-if="doc.partner_id.city">
+                                            <p style="margin-bottom: 0;">
+                                                <strong>Ciudad:</strong> 
+                                                <span t-field="doc.partner_id.zip"/> <span t-field="doc.partner_id.city"/>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Capítulos del presupuesto -->
+                            <t t-if="doc.chapter_ids">
+                                <t t-foreach="doc.chapter_ids" t-as="chapter">
+                                    <!-- Salto de página si está configurado -->
+                                    <div t-if="chapter.page_break_before and not chapter_first" style="page-break-before: always;"/>
+                                    
+                                    <div class="chapter-container">
+                                        <div class="chapter-header">
+                                            <i class="fa fa-folder-open" style="margin-right: 10px;"></i>
+                                            <span t-field="chapter.name"/>
+                                            <span style="float: right; font-size: 14px; opacity: 0.9;">
+                                                <span t-field="chapter.total_amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Líneas del capítulo -->
+                                        <table class="table chapter-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 25%;">Producto</th>
+                                                    <th style="width: 30%;">Descripción</th>
+                                                    <th style="width: 10%;" class="text-center">Cantidad</th>
+                                                    <th style="width: 10%;" class="text-center">Unidad</th>
+                                                    <th style="width: 12%;" class="text-right">Precio Unit.</th>
+                                                    <th style="width: 13%;" class="text-right">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="chapter.chapter_line_ids" t-as="line">
+                                                    <tr>
+                                                        <td>
+                                                            <div t-if="line.product_id" class="product-name">
+                                                                <span t-field="line.product_id.name"/>
+                                                            </div>
+                                                            <div t-if="not line.product_id" style="color: #6c757d; font-style: italic;">
+                                                                Sin producto
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="description-text">
+                                                                <span t-field="line.name"/>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span t-field="line.product_uom_qty"/>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span t-if="line.product_uom" t-field="line.product_uom.name"/>
+                                                        </td>
+                                                        <td class="text-right price-highlight">
+                                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </td>
+                                                        <td class="text-right price-highlight">
+                                                            <span t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="chapter-total">
+                                                    <td colspan="5" class="text-right">
+                                                        <i class="fa fa-calculator" style="margin-right: 8px;"></i>
+                                                        <strong>Total del Capítulo:</strong>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <strong>
+                                                            <span t-field="chapter.total_amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                        </strong>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </t>
+                            </t>
+                            
+                            <!-- Total general -->
+                            <div class="total-section">
+                                <h4 style="color: #495057; margin-bottom: 20px;">
+                                    <i class="fa fa-money" style="margin-right: 10px;"></i>
+                                    Resumen Financiero
+                                </h4>
+                                <div class="row">
+                                    <div class="col-6"></div>
+                                    <div class="col-6">
+                                        <table class="table total-table">
+                                            <tr>
+                                                <td><strong>Base Imponible:</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="doc.amount_untaxed" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Impuestos:</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="doc.amount_tax" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr class="final-total">
+                                                <td>
+                                                    <i class="fa fa-trophy" style="margin-right: 8px;"></i>
+                                                    <strong>TOTAL PRESUPUESTO:</strong>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong>
+                                                        <span t-field="doc.amount_total" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Términos y condiciones -->
+                            <div t-if="doc.note" class="terms-section">
+                                <h5 style="color: #856404; margin-bottom: 15px;">
+                                    <i class="fa fa-info-circle" style="margin-right: 8px;"></i>
+                                    Términos y Condiciones
+                                </h5>
+                                <div style="color: #856404;">
+                                    <span t-field="doc.note"/>
+                                </div>
+                            </div>
+                            
+                            <div class="oe_structure"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
