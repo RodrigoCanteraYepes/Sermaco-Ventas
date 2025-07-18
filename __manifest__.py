@@ -15,7 +15,7 @@
     """,
     'author': 'Tu Empresa',
     'website': 'https://www.tuempresa.com',
-    'depends': ['sale', 'sale_management'],
+    'depends': ['base', 'sale', 'sale_management', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'data/sale_order_chapter_data.xml',
@@ -24,8 +24,6 @@
         'reports/sale_order_report.xml',
         'reports/sale_order_report_modern.xml',
     ],
-
-
     'installable': True,
     'auto_install': False,
     'application': False,
