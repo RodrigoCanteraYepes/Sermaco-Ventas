@@ -24,6 +24,15 @@
         'reports/sale_order_report.xml',
         'reports/sale_order_report_modern.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'sale_order_chapters/static/src/css/sale_order_collapse.css',
+            'sale_order_chapters/static/src/js/sale_order_collapse.js',
+        ],
+        'web.report_assets_common': [
+            'sale_order_chapters/static/src/css/sale_order_collapse.css',
+        ],
+    },
     'installable': True,
     'auto_install': False,
     'application': False,
