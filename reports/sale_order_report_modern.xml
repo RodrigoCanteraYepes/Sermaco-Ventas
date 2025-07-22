@@ -16,13 +16,27 @@
         <!-- Estilos CSS personalizados -->
         <template id="report_saleorder_chapters_modern_styles">
             <style>
-                .modern-header {
-                    background: #667eea;
-                    color: white;
-                    padding: 30px;
-                    margin-bottom: 30px;
-                    border-radius: 10px;
-                }
+                 /* Estilos para funcionalidad de colapso */
+                 .section-line {
+                     background-color: #f8f9fa;
+                     font-weight: bold;
+                     border-left: 4px solid #007cba;
+                 }
+                 
+                 .collapse-icon {
+                     cursor: pointer;
+                     margin-right: 8px;
+                     color: #007cba;
+                     font-size: 14px;
+                 }
+                 
+                 .modern-header {
+                     background: #667eea;
+                     color: white;
+                     padding: 30px;
+                     margin-bottom: 30px;
+                     border-radius: 10px;
+                 }
                 
                 .info-card {
                     background: white;
